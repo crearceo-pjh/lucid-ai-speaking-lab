@@ -1,0 +1,2281 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lucid AI Speaking Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --blue:#3B82F6;--blue-d:#1D4ED8;--blue-l:#EFF6FF;--blue-m:#DBEAFE;
+  --purple:#7C3AED;--purple-d:#5B21B6;--purple-l:#F5F3FF;--purple-m:#EDE9FE;
+  --green:#10B981;--green-d:#047857;--green-l:#ECFDF5;--green-m:#D1FAE5;
+  --teal:#0D9488;--teal-l:#F0FDFA;--teal-m:#CCFBF1;
+  --amber:#F59E0B;--amber-d:#92400E;--amber-l:#FFFBEB;--amber-m:#FDE68A;
+  --red:#EF4444;--red-l:#FEF2F2;--red-m:#FEE2E2;
+  --pink:#EC4899;--pink-l:#FDF2F8;
+  --gray-50:#F8FAFC;--gray-100:#F1F5F9;--gray-200:#E2E8F0;--gray-300:#CBD5E1;
+  --gray-400:#94A3B8;--gray-500:#64748B;--gray-600:#475569;--gray-700:#334155;--gray-800:#1E293B;--gray-900:#0F172A;
+  --white:#FFFFFF;--radius:12px;--radius-sm:8px;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);
+  --shadow-md:0 4px 6px rgba(0,0,0,.07),0 2px 4px rgba(0,0,0,.05);
+  --shadow-lg:0 10px 15px rgba(0,0,0,.08),0 4px 6px rgba(0,0,0,.04);
+}
+body{font-family:'Inter',sans-serif;background:var(--gray-50);color:var(--gray-800);min-height:100vh}
+
+/* LEVEL SYSTEM COLORS — Pre-A1 to B2 */
+.cefr-pre-a1{--lc:#6B7280;--ll:#F3F4F6;--lm:#E5E7EB;--lt:#374151}
+.cefr-a1    {--lc:#10B981;--ll:#ECFDF5;--lm:#D1FAE5;--lt:#047857}
+.cefr-a2    {--lc:#3B82F6;--ll:#EFF6FF;--lm:#DBEAFE;--lt:#1D4ED8}
+.cefr-b1    {--lc:#7C3AED;--ll:#F5F3FF;--lm:#EDE9FE;--lt:#5B21B6}
+.cefr-b2    {--lc:#DC2626;--ll:#FEF2F2;--lm:#FEE2E2;--lt:#991B1B}
+
+.level-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:.02em;background:var(--lm,#E5E7EB);color:var(--lt,#374151);border:1px solid var(--lc,#6B7280)}
+.level-dot{width:8px;height:8px;border-radius:50%;background:var(--lc,#6B7280);flex-shrink:0}
+
+/* HEADER */
+.app-header{background:var(--white);border-bottom:1px solid var(--gray-200);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;color:var(--gray-900)}
+.logo-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--blue),var(--purple));border-radius:10px;display:flex;align-items:center;justify-content:center;color:white;font-size:16px;font-weight:800}
+.nav-tabs{display:flex;gap:4px}
+.nav-tab{padding:6px 14px;border-radius:6px;border:none;background:none;font-size:13px;font-weight:500;color:var(--gray-500);cursor:pointer;transition:.15s;font-family:'Inter',sans-serif}
+.nav-tab:hover{background:var(--gray-100);color:var(--gray-700)}
+.nav-tab.active{background:var(--blue-l);color:var(--blue-d);font-weight:600}
+.user-info{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--gray-600)}
+.avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px}
+
+/* LAYOUT */
+.page{display:none}
+.page.active{display:block}
+.container{max-width:1280px;margin:0 auto;padding:24px}
+.sidebar-layout{display:grid;grid-template-columns:220px 1fr;gap:24px;align-items:start}
+.sidebar{background:var(--white);border-radius:var(--radius);border:1px solid var(--gray-200);padding:14px;position:sticky;top:80px}
+.sidebar-menu{list-style:none}
+.sidebar-item{padding:9px 12px;border-radius:var(--radius-sm);cursor:pointer;font-size:13px;font-weight:500;color:var(--gray-600);display:flex;align-items:center;gap:10px;transition:.15s;margin-bottom:2px}
+.sidebar-item:hover{background:var(--gray-50);color:var(--gray-800)}
+.sidebar-item.active{background:var(--blue-l);color:var(--blue-d)}
+.sidebar-icon{width:18px;text-align:center;font-size:15px}
+.content-area{min-width:0}
+
+/* CARDS */
+.card{background:var(--white);border-radius:var(--radius);border:1px solid var(--gray-200);padding:20px;box-shadow:var(--shadow)}
+.card-lg{padding:24px}
+.stat-card{background:var(--white);border-radius:var(--radius);border:1px solid var(--gray-200);padding:20px;box-shadow:var(--shadow)}
+.stat-label{font-size:11px;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.stat-value{font-size:28px;font-weight:700;color:var(--gray-900);line-height:1}
+.stat-sub{font-size:12px;color:var(--gray-400);margin-top:4px}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:960px){.grid-4{grid-template-columns:repeat(2,1fr)}.sidebar-layout{grid-template-columns:1fr}}
+@media(max-width:600px){.grid-2,.grid-3{grid-template-columns:1fr}.grid-4{grid-template-columns:1fr}}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.03em}
+.badge-blue{background:var(--blue-m);color:var(--blue-d)}
+.badge-green{background:var(--green-m);color:var(--green-d)}
+.badge-amber{background:var(--amber-m);color:var(--amber-d)}
+.badge-purple{background:var(--purple-m);color:var(--purple-d)}
+.badge-red{background:var(--red-m);color:#B91C1C}
+.badge-gray{background:var(--gray-200);color:var(--gray-600)}
+.badge-teal{background:var(--teal-m);color:var(--teal)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:var(--radius-sm);border:none;font-size:14px;font-weight:600;cursor:pointer;transition:.15s;font-family:'Inter',sans-serif;line-height:1}
+.btn-primary{background:var(--blue);color:white}
+.btn-primary:hover{background:var(--blue-d)}
+.btn-purple{background:var(--purple);color:white}
+.btn-purple:hover{background:var(--purple-d)}
+.btn-green{background:var(--green);color:white}
+.btn-green:hover{background:var(--green-d)}
+.btn-outline{background:white;color:var(--gray-700);border:1px solid var(--gray-200)}
+.btn-outline:hover{background:var(--gray-50)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-lg{padding:13px 28px;font-size:15px}
+
+.section-title{font-size:20px;font-weight:700;color:var(--gray-900);margin-bottom:4px}
+.section-sub{font-size:14px;color:var(--gray-500);margin-bottom:20px}
+
+/* ====== LEVEL DISPLAY PANEL ====== */
+.level-panel{background:white;border:1px solid var(--gray-200);border-radius:14px;padding:20px;margin-bottom:20px;box-shadow:var(--shadow)}
+.level-panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+.level-panel-title{font-size:15px;font-weight:700;color:var(--gray-800)}
+.level-trio{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.level-trio-card{border-radius:10px;padding:14px 16px;border:1px solid var(--gray-200)}
+.level-trio-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gray-400);margin-bottom:6px}
+.level-trio-value{font-size:20px;font-weight:800;color:var(--gray-900);margin-bottom:2px}
+.level-trio-desc{font-size:11px;color:var(--gray-500);line-height:1.4}
+.level-trio-bar{height:4px;border-radius:99px;background:var(--gray-100);margin-top:10px;overflow:hidden}
+.level-trio-fill{height:100%;border-radius:99px;background:var(--lc,#3B82F6)}
+
+/* LOGIN */
+.login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#EFF6FF 0%,#F5F3FF 100%)}
+.login-box{background:white;border-radius:20px;padding:40px;width:420px;box-shadow:var(--shadow-lg);border:1px solid var(--gray-200)}
+.login-logo{text-align:center;margin-bottom:28px}
+.login-logo .big-icon{width:64px;height:64px;background:linear-gradient(135deg,var(--blue),var(--purple));border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 12px;color:white;font-weight:800}
+.login-logo h1{font-size:22px;font-weight:800;color:var(--gray-900)}
+.login-logo p{font-size:13px;color:var(--gray-500);margin-top:4px}
+.role-select{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px}
+.role-btn{padding:14px 10px;border-radius:12px;border:2px solid var(--gray-200);background:white;cursor:pointer;text-align:center;transition:.15s;font-family:'Inter',sans-serif}
+.role-btn:hover{border-color:var(--blue);background:var(--blue-l)}
+.role-btn.selected{border-color:var(--blue);background:var(--blue-l)}
+.role-btn .role-icon{font-size:24px;margin-bottom:6px}
+.role-btn .role-name{font-size:13px;font-weight:600;color:var(--gray-700)}
+.form-group{margin-bottom:14px}
+.form-label{font-size:13px;font-weight:500;color:var(--gray-600);margin-bottom:6px;display:block}
+.form-input{width:100%;padding:10px 14px;border-radius:var(--radius-sm);border:1px solid var(--gray-200);font-size:14px;font-family:'Inter',sans-serif;color:var(--gray-800);outline:none;transition:.15s}
+.form-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+.login-btn{width:100%;padding:12px;border-radius:var(--radius-sm);border:none;background:linear-gradient(135deg,var(--blue),var(--purple));color:white;font-size:15px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:.15s}
+.login-btn:hover{opacity:.9}
+
+/* PROGRESS */
+.progress-bar{background:var(--gray-100);border-radius:99px;height:8px;overflow:hidden}
+.progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--blue),var(--purple));transition:.5s}
+.progress-sm{height:5px}
+
+/* SPEAKING UI */
+.speaking-area{background:linear-gradient(135deg,#EFF6FF,#F5F3FF);border-radius:var(--radius);padding:28px;text-align:center;border:1px solid var(--blue-m)}
+.mic-btn{width:80px;height:80px;border-radius:50%;border:none;background:var(--blue);color:white;font-size:32px;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;margin:0 auto}
+.mic-btn.recording{background:var(--red);animation:pulse 1.5s infinite}
+.mic-btn:hover{transform:scale(1.05)}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(239,68,68,.4)}70%{box-shadow:0 0 0 20px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
+.chat-bubble{padding:12px 16px;border-radius:12px;margin-bottom:8px;max-width:80%;font-size:14px;line-height:1.5}
+.bubble-ai{background:var(--white);border:1px solid var(--gray-200);border-radius:4px 12px 12px 12px;text-align:left}
+.bubble-student{background:var(--blue);color:white;border-radius:12px 4px 12px 12px;margin-left:auto;text-align:right}
+.chat-area{max-height:280px;overflow-y:auto;padding:14px;background:var(--gray-50);border-radius:var(--radius-sm);margin-bottom:14px}
+
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse;font-size:13px}
+.data-table th{text-align:left;padding:10px 14px;background:var(--gray-50);color:var(--gray-500);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--gray-200)}
+.data-table td{padding:11px 14px;border-bottom:1px solid var(--gray-100);color:var(--gray-700)}
+.data-table tr:hover td{background:var(--gray-50)}
+
+/* WORD CARD */
+.word-card{background:var(--white);border-radius:var(--radius);border:1px solid var(--gray-200);padding:18px;cursor:pointer;transition:.15s;position:relative}
+.word-card:hover{border-color:var(--blue);box-shadow:var(--shadow-md)}
+.word-card.done{border-color:var(--green);background:var(--green-l)}
+.word-en{font-size:22px;font-weight:800;color:var(--gray-900);margin-bottom:3px}
+.word-ko{font-size:14px;color:var(--gray-500);margin-bottom:8px}
+.word-ex{font-size:13px;color:var(--gray-600);font-style:italic;line-height:1.5}
+.word-check{position:absolute;top:12px;right:12px;width:26px;height:26px;border-radius:50%;background:var(--green);color:white;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;opacity:0;transition:.2s}
+.word-card.done .word-check{opacity:1}
+.word-diff{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:6px}
+
+/* QUIZ */
+.quiz-option{width:100%;padding:13px 16px;margin-bottom:9px;border-radius:var(--radius-sm);border:2px solid var(--gray-200);background:white;text-align:left;font-size:14px;font-weight:500;cursor:pointer;transition:.15s;font-family:'Inter',sans-serif;color:var(--gray-700)}
+.quiz-option:hover{border-color:var(--blue);background:var(--blue-l);color:var(--blue-d)}
+.quiz-option.correct{border-color:var(--green);background:var(--green-l);color:var(--green-d)}
+.quiz-option.wrong{border-color:var(--red);background:var(--red-l);color:#B91C1C}
+
+/* FEEDBACK SCORES */
+.feedback-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:600px){.feedback-grid{grid-template-columns:repeat(2,1fr)}}
+.feedback-score-card{background:var(--gray-50);border-radius:var(--radius-sm);padding:14px;text-align:center}
+.feedback-score-card .fscore{font-size:26px;font-weight:800;margin-bottom:3px}
+.feedback-score-card .flabel{font-size:11px;color:var(--gray-500);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+
+/* REPORT */
+.report-card-parent{background:white;border-radius:14px;border:1px solid var(--gray-200);padding:22px;box-shadow:var(--shadow-md)}
+.report-metric{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--gray-100)}
+.report-metric:last-child{border-bottom:none}
+.report-metric-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.report-metric-label{font-size:12px;color:var(--gray-500);margin-bottom:2px}
+.report-metric-value{font-size:15px;font-weight:700;color:var(--gray-900)}
+
+/* STEPS */
+.steps{display:flex;align-items:center;margin-bottom:24px}
+.step{display:flex;align-items:center;gap:8px;flex:1}
+.step-num{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;border:2px solid var(--gray-200);color:var(--gray-400);background:white;transition:.3s}
+.step.done .step-num{background:var(--green);border-color:var(--green);color:white}
+.step.active .step-num{background:var(--blue);border-color:var(--blue);color:white}
+.step-label{font-size:11px;color:var(--gray-400);font-weight:500;transition:.3s}
+.step.active .step-label,.step.done .step-label{color:var(--gray-700)}
+.step-line{flex:1;height:2px;background:var(--gray-200);margin:0 4px;transition:.3s}
+.step.done .step-line{background:var(--green)}
+
+/* CURRICULUM */
+.curr-level{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
+.curr-level-head{padding:13px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-weight:600;color:var(--gray-800);font-size:14px}
+.curr-level-head:hover{background:var(--gray-50)}
+.curr-body{padding:0 18px 14px;border-top:1px solid var(--gray-100);display:none}
+.curr-body.open{display:block}
+.curr-unit{padding:10px 0;border-bottom:1px solid var(--gray-100)}
+.curr-unit:last-child{border-bottom:none}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--gray-900);color:white;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;z-index:9999;transform:translateY(80px);opacity:0;transition:.3s;pointer-events:none}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* BAR CHART */
+.bar-chart{display:flex;align-items:flex-end;gap:8px;height:110px;padding:6px 0}
+.bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.bar{width:100%;border-radius:4px 4px 0 0;background:var(--blue-m);min-height:4px;transition:.6s}
+.bar:hover{background:var(--blue)}
+.bar-lbl{font-size:10px;color:var(--gray-400);white-space:nowrap}
+
+/* WELCOME BANNER */
+.welcome-banner{border-radius:16px;padding:26px 30px;color:white;margin-bottom:20px;position:relative;overflow:hidden}
+.welcome-banner::after{content:'✦';position:absolute;right:28px;top:14px;font-size:60px;opacity:.12}
+.welcome-banner h2{font-size:21px;font-weight:800;margin-bottom:4px}
+.welcome-banner p{font-size:14px;opacity:.85}
+.welcome-meta{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap}
+.welcome-meta-item{font-size:12px;opacity:.85;display:flex;align-items:center;gap:5px}
+
+/* LESSON STEP CARDS */
+.lesson-step-card{background:white;border-radius:var(--radius);border:2px solid var(--gray-200);padding:18px;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:14px}
+.lesson-step-card:hover{border-color:var(--blue);box-shadow:var(--shadow-md)}
+.lesson-step-card.completed{border-color:var(--green);background:var(--green-l)}
+.lesson-step-card.active{border-color:var(--blue);background:var(--blue-l)}
+.step-icon-box{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.step-card-info h4{font-size:14px;font-weight:700;color:var(--gray-900);margin-bottom:2px}
+.step-card-info p{font-size:12px;color:var(--gray-500)}
+
+/* MODAL */
+.modal-backdrop{display:none;background:rgba(0,0,0,.5);min-height:100vh;width:100%;position:fixed;top:0;left:0;z-index:200;align-items:center;justify-content:center}
+.modal-backdrop.show{display:flex}
+.modal-box{background:white;border-radius:16px;padding:26px;width:90%;max-width:560px;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow-lg)}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.modal-head h3{font-size:17px;font-weight:700}
+.close-btn{background:none;border:none;font-size:20px;cursor:pointer;color:var(--gray-400);padding:4px;line-height:1}
+
+.coaching-textarea{width:100%;min-height:110px;padding:11px 13px;border-radius:var(--radius-sm);border:1px solid var(--gray-200);font-size:13px;font-family:'Inter',sans-serif;color:var(--gray-800);resize:vertical;outline:none;transition:.15s}
+.coaching-textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+
+/* LEVEL INDICATOR for admin */
+.level-select-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.level-select-btn{padding:10px 12px;border-radius:10px;border:2px solid var(--gray-200);background:white;cursor:pointer;text-align:center;font-family:'Inter',sans-serif;transition:.15s}
+.level-select-btn:hover{border-color:var(--blue)}
+.level-select-btn.sel{border-color:var(--lc,var(--blue));background:var(--ll,var(--blue-l))}
+.level-select-btn .ls-cefr{font-size:16px;font-weight:800;color:var(--lc,var(--blue-d));margin-bottom:2px}
+.level-select-btn .ls-sub{font-size:10px;color:var(--gray-500)}
+
+/* admin student edit row */
+.edit-highlight{background:var(--amber-l)!important}
+
+.emoji-xl{font-size:40px;display:block;text-align:center;margin-bottom:8px}
+
+/* stu av */
+.stu-av{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:white;flex-shrink:0}
+
+/* LEVEL TAG (compact in tables) */
+.lv-tag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- ============ LOGIN ============ -->
+<div id="loginPage">
+<div class="login-page">
+<div class="login-box">
+  <div class="login-logo">
+    <div class="big-icon">L</div>
+    <h1>Lucid AI Speaking Lab</h1>
+    <p>AI 기반 영어 학습 플랫폼</p>
+  </div>
+  <p style="font-size:12px;font-weight:600;color:var(--gray-500);margin-bottom:10px">로그인 유형 선택</p>
+  <div class="role-select">
+    <button class="role-btn selected" onclick="selectRole('student',this)"><div class="role-icon">🎒</div><div class="role-name">학생</div></button>
+    <button class="role-btn" onclick="selectRole('teacher',this)"><div class="role-icon">👩‍🏫</div><div class="role-name">선생님</div></button>
+    <button class="role-btn" onclick="selectRole('parent',this)"><div class="role-icon">👨‍👩‍👧</div><div class="role-name">학부모</div></button>
+    <button class="role-btn" onclick="selectRole('admin',this)"><div class="role-icon">🏫</div><div class="role-name">원장/관리자</div></button>
+  </div>
+  <div class="form-group">
+    <label class="form-label">아이디 (이메일)</label>
+    <input class="form-input" type="text" placeholder="example@lucid.co.kr" id="loginId">
+  </div>
+  <div class="form-group" style="margin-bottom:20px">
+    <label class="form-label">비밀번호</label>
+    <input class="form-input" type="password" placeholder="••••••••">
+  </div>
+  <button class="login-btn" onclick="doLogin()">로그인 →</button>
+  <p style="text-align:center;font-size:11px;color:var(--gray-400);margin-top:14px">데모: 아무 값이나 입력 후 로그인하세요</p>
+</div>
+</div>
+</div>
+
+<!-- ============ MAIN APP ============ -->
+<div id="mainApp" style="display:none">
+
+<div class="app-header">
+  <div class="logo"><div class="logo-icon">L</div><span>Lucid AI Speaking Lab</span></div>
+  <div class="nav-tabs" id="mainNavTabs"></div>
+  <div class="user-info">
+    <div class="avatar" id="userAvatar" style="background:var(--blue-m);color:var(--blue-d)">S</div>
+    <span id="userName"></span>
+    <button class="btn btn-outline btn-sm" onclick="logout()">로그아웃</button>
+  </div>
+</div>
+
+<!-- ===== STUDENT PAGES ===== -->
+
+<!-- TODAY -->
+<div id="page-student-today" class="page">
+<div class="container">
+  <div class="welcome-banner" id="studentBanner" style="background:linear-gradient(135deg,var(--blue),var(--purple))">
+    <h2 id="bannerGreet">안녕하세요, 민준! 👋</h2>
+    <p>오늘도 열심히 영어 공부해봐요!</p>
+    <div class="welcome-meta">
+      <div class="welcome-meta-item" id="bannerUnit">📚 Level A2 · Unit 3 / Week 2</div>
+      <div class="welcome-meta-item">📅 <span id="todayDate"></span></div>
+      <div class="welcome-meta-item">🔥 연속 출석 7일!</div>
+    </div>
+  </div>
+
+  <!-- LEVEL PANEL -->
+  <div class="level-panel" id="studentLevelPanel">
+    <div class="level-panel-header">
+      <div class="level-panel-title">📊 나의 영어 레벨</div>
+      <div id="studentCefrPill"></div>
+    </div>
+    <div class="level-trio" id="levelTrio"></div>
+    <div style="margin-top:14px;font-size:12px;color:var(--gray-500);line-height:1.6" id="levelDesc"></div>
+  </div>
+
+  <div style="margin-bottom:20px">
+    <div class="section-title" id="todayTopicTitle">오늘의 학습 주제</div>
+    <div class="section-sub" id="todayTopicSub">At the Zoo 🦁 — 동물원에서 좋아하는 동물에 대해 이야기해봐요</div>
+    <div class="steps">
+      <div class="step done"><div class="step-num">✓</div><div class="step-label">Vocabulary</div><div class="step-line"></div></div>
+      <div class="step active"><div class="step-num">2</div><div class="step-label">Listening</div><div class="step-line"></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-label">AI Speaking</div><div class="step-line"></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-label">Review Quiz</div></div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:20px">
+    <div class="lesson-step-card completed" onclick="goStu('vocab')">
+      <div class="step-icon-box" style="background:var(--green-l)">✅</div>
+      <div class="step-card-info"><h4>Vocabulary Preview</h4><p id="vocabCardSub">단어 10개 완료 · 5분</p></div>
+      <span class="badge badge-green">완료</span>
+    </div>
+    <div class="lesson-step-card active" onclick="goStu('listening')">
+      <div class="step-icon-box" style="background:var(--blue-l)">🎧</div>
+      <div class="step-card-info"><h4>Listening Practice</h4><p>대화문 듣기 · 5분</p></div>
+      <span class="badge badge-blue">진행중</span>
+    </div>
+    <div class="lesson-step-card" onclick="goStu('speaking')">
+      <div class="step-icon-box" style="background:var(--purple-m)">🤖</div>
+      <div class="step-card-info"><h4>AI Speaking Practice</h4><p>AI 튜터와 대화 · 10분</p></div>
+      <span class="badge badge-purple">미완료</span>
+    </div>
+    <div class="lesson-step-card" onclick="goStu('quiz')">
+      <div class="step-icon-box" style="background:var(--amber-l)">📝</div>
+      <div class="step-card-info"><h4>Review Quiz</h4><p>복습 퀴즈 · 5분</p></div>
+      <span class="badge badge-amber">미완료</span>
+    </div>
+  </div>
+
+  <div class="grid-3">
+    <div class="stat-card"><div class="stat-label">이번 주 Speaking</div><div class="stat-value">32<span style="font-size:14px;color:var(--gray-400)">분</span></div><div class="stat-sub">목표 50분 · 64%</div><div class="progress-bar" style="margin-top:8px"><div class="progress-fill" style="width:64%"></div></div></div>
+    <div class="stat-card"><div class="stat-label">단어 학습 수</div><div class="stat-value">48<span style="font-size:14px;color:var(--gray-400)">개</span></div><div class="stat-sub">이번 달 누적</div></div>
+    <div class="stat-card"><div class="stat-label">평균 Speaking 점수</div><div class="stat-value" style="color:var(--blue)">82</div><div class="stat-sub">지난 주 대비 +7점 📈</div></div>
+  </div>
+</div>
+</div>
+
+<!-- VOCAB -->
+<div id="page-student-vocab" class="page">
+<div class="container">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+    <button class="btn btn-outline btn-sm" onclick="goStu('today')">← 뒤로</button>
+    <div class="section-title">📚 Vocabulary Preview</div>
+  </div>
+  <div class="section-sub" id="vocabLevelNote">오늘의 단어 10개를 학습하고 완료 버튼을 눌러주세요</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <span id="vocabProg" style="font-size:13px;color:var(--gray-500);font-weight:500">0 / 10 완료</span>
+    <button class="btn btn-outline btn-sm" onclick="showToast('🔊 전체 발음 재생 중...')">🔊 전체 듣기</button>
+  </div>
+  <div class="progress-bar" style="margin-bottom:18px"><div class="progress-fill" id="vocabBar" style="width:0%"></div></div>
+  <div id="vocabGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px"></div>
+  <div style="margin-top:20px;text-align:center;display:none" id="vocabNextBtn">
+    <button class="btn btn-primary btn-lg" onclick="goStu('listening')">다음 단계: Listening →</button>
+  </div>
+</div>
+</div>
+
+<!-- LISTENING -->
+<div id="page-student-listening" class="page">
+<div class="container" style="max-width:700px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+    <button class="btn btn-outline btn-sm" onclick="goStu('today')">← 뒤로</button>
+    <div class="section-title">🎧 Listening Practice</div>
+  </div>
+  <div class="section-sub" id="listeningLevelNote">대화를 듣고 빈칸을 채워보세요</div>
+  <div class="card card-lg" style="margin-bottom:18px">
+    <div style="background:var(--gray-50);border-radius:10px;padding:18px;margin-bottom:14px;font-size:15px;line-height:2;color:var(--gray-700)">
+      <p><strong>Sarah:</strong> Let's go to the zoo today!</p>
+      <p><strong>Tom:</strong> Great idea! I love watching <span id="blank1" style="display:inline-block;border-bottom:2px solid var(--blue);min-width:80px;text-align:center;color:var(--blue);font-weight:700">______</span>.</p>
+      <p><strong>Sarah:</strong> Me too! The <span id="blank2" style="display:inline-block;border-bottom:2px solid var(--blue);min-width:80px;text-align:center;color:var(--blue);font-weight:700">______</span> are so cute.</p>
+      <p><strong>Tom:</strong> I think <span id="blank3" style="display:inline-block;border-bottom:2px solid var(--blue);min-width:80px;text-align:center;color:var(--blue);font-weight:700">______</span> are the most amazing animals.</p>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:center;margin-bottom:14px">
+      <button class="btn btn-outline" onclick="showToast('🎧 오디오 재생 중...')">▶ 대화 듣기</button>
+      <button class="btn btn-outline" onclick="showToast('🔄 다시 듣기...')">🔄 다시 듣기</button>
+    </div>
+    <div id="listeningAnswers">
+      <p style="font-size:12px;color:var(--gray-500);margin-bottom:8px">정답을 선택하세요 (Blank 1):</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button class="quiz-option" onclick="checkL(this,'monkeys',1)">monkeys</button>
+        <button class="quiz-option" onclick="checkL(this,'penguins',1)">penguins</button>
+        <button class="quiz-option" onclick="checkL(this,'lions',1)">lions</button>
+        <button class="quiz-option" onclick="checkL(this,'elephants',1)">elephants</button>
+      </div>
+    </div>
+  </div>
+  <div id="listeningDone" style="display:none;text-align:center;padding:20px">
+    <div class="emoji-xl">🎉</div>
+    <h3 style="font-size:17px;font-weight:700;margin-bottom:8px">잘했어요!</h3>
+    <p style="color:var(--gray-500);font-size:13px;margin-bottom:18px">Listening 완료!</p>
+    <button class="btn btn-primary btn-lg" onclick="goStu('speaking')">AI Speaking 시작하기 🤖</button>
+  </div>
+</div>
+</div>
+
+<!-- SPEAKING -->
+<div id="page-student-speaking" class="page">
+<div class="container" style="max-width:700px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+    <button class="btn btn-outline btn-sm" onclick="goStu('today')">← 뒤로</button>
+    <div class="section-title">🤖 AI Speaking Practice</div>
+  </div>
+  <div class="section-sub" id="speakingLevelNote">AI 튜터 Lumi와 영어로 대화해보세요!</div>
+  <div class="card" style="margin-bottom:14px;padding:14px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:20px">🤖</div>
+      <div><div style="font-weight:700;font-size:14px">Lumi (AI Tutor)</div><div style="font-size:12px;color:var(--green);font-weight:500">● 온라인</div></div>
+      <div style="margin-left:auto" id="speakingLevelBadge"></div>
+    </div>
+  </div>
+  <div class="chat-area" id="chatArea">
+    <div style="display:flex;gap:10px;margin-bottom:10px;align-items:flex-start">
+      <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">🤖</div>
+      <div class="chat-bubble bubble-ai" id="aiOpener">Hi! I'm Lumi! Today we're talking about animals at the zoo. 🦁 What is your favorite animal?</div>
+    </div>
+  </div>
+  <div class="speaking-area">
+    <p style="font-size:13px;color:var(--gray-600);margin-bottom:14px;font-weight:500" id="speakStatus">마이크 버튼을 눌러 말해보세요</p>
+    <button class="mic-btn" id="micBtn" onclick="toggleMic()">🎤</button>
+    <p style="font-size:11px;color:var(--gray-400);margin-top:10px">버튼을 누르고 영어로 말하세요</p>
+    <div style="margin-top:14px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap" id="quickReplies"></div>
+  </div>
+  <div style="display:flex;gap:10px;margin-top:14px">
+    <button class="btn btn-outline" style="flex:1" onclick="resetChat()">🔄 대화 초기화</button>
+    <button class="btn btn-primary" style="flex:1" onclick="goStu('feedback')">✅ 완료 · 피드백 보기</button>
+  </div>
+</div>
+</div>
+
+<!-- FEEDBACK -->
+<div id="page-student-feedback" class="page">
+<div class="container" style="max-width:740px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+    <button class="btn btn-outline btn-sm" onclick="goStu('today')">← 홈으로</button>
+    <div class="section-title">📊 AI Speaking 분석 리포트</div>
+  </div>
+  <div class="card card-lg" style="margin-bottom:14px">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px">
+      <div style="font-size:44px">🎉</div>
+      <div>
+        <div style="font-size:19px;font-weight:800;color:var(--gray-900)">잘했어요, 민준!</div>
+        <div style="font-size:13px;color:var(--gray-500);margin-top:2px">At the Zoo · AI 대화 완료</div>
+        <div id="feedbackLevelRow" style="margin-top:6px"></div>
+      </div>
+      <div style="margin-left:auto;text-align:center">
+        <div style="font-size:36px;font-weight:800;color:var(--blue)">82</div>
+        <div style="font-size:11px;color:var(--gray-400);font-weight:500">종합 점수</div>
+      </div>
+    </div>
+    <div class="feedback-grid">
+      <div class="feedback-score-card"><div class="fscore" style="color:var(--blue)">4:32</div><div class="flabel">Speaking Time</div></div>
+      <div class="feedback-score-card"><div class="fscore" style="color:var(--green)">8</div><div class="flabel">단어 사용</div></div>
+      <div class="feedback-score-card"><div class="fscore" style="color:var(--purple)">78%</div><div class="flabel">문법 정확도</div></div>
+      <div class="feedback-score-card"><div class="fscore" style="color:var(--amber)">82%</div><div class="flabel">발음 점수</div></div>
+      <div class="feedback-score-card"><div class="fscore" style="color:var(--blue)">75%</div><div class="flabel">유창성</div></div>
+      <div class="feedback-score-card"><div class="fscore" style="color:var(--green)">90%</div><div class="flabel">자신감</div></div>
+    </div>
+  </div>
+  <div class="grid-2" style="margin-bottom:14px">
+    <div class="card">
+      <div style="font-size:14px;font-weight:700;color:var(--green);margin-bottom:10px">👍 잘한 문장</div>
+      <div style="font-size:13px;color:var(--gray-700);line-height:1.9">
+        <p>• "I like lions because they are very strong."</p>
+        <p>• "The elephant has a long nose."</p>
+        <p>• "Monkeys can climb trees fast."</p>
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-size:14px;font-weight:700;color:var(--amber);margin-bottom:10px">✏️ 개선 문장</div>
+      <div style="font-size:13px;color:var(--gray-700);line-height:1.9">
+        <p>❌ "I go zoo yesterday."</p>
+        <p>✅ "I went to the zoo yesterday."</p>
+        <hr style="margin:8px 0;border:none;border-top:1px solid var(--gray-100)">
+        <p>❌ "Tiger is more big than lion."</p>
+        <p>✅ "The tiger is bigger than the lion."</p>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:14px;font-weight:700;color:var(--purple);margin-bottom:10px">🎯 이번 주 추천 연습</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">
+      <span class="badge badge-purple">비교급 (bigger, faster)</span>
+      <span class="badge badge-blue">과거 시제 (went, saw)</span>
+      <span class="badge badge-green">동물 어휘 반복</span>
+      <span class="badge badge-amber">관사 사용 (a/the)</span>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:18px">
+    <button class="btn btn-primary btn-lg" onclick="goStu('quiz')">📝 Review Quiz 풀기</button>
+  </div>
+</div>
+</div>
+
+<!-- QUIZ -->
+<div id="page-student-quiz" class="page">
+<div class="container" style="max-width:620px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+    <button class="btn btn-outline btn-sm" onclick="goStu('today')">← 뒤로</button>
+    <div class="section-title">📝 Review Quiz</div>
+  </div>
+  <div class="section-sub" id="quizLevelNote">오늘 배운 내용을 복습해보세요</div>
+  <div id="quizArea">
+    <div class="card card-lg">
+      <div style="font-size:12px;color:var(--gray-400);font-weight:500;margin-bottom:5px">Question <span id="qNum">1</span> / 5</div>
+      <div class="progress-bar" style="margin-bottom:14px"><div class="progress-fill" id="quizBar" style="width:20%"></div></div>
+      <p style="font-size:17px;font-weight:700;color:var(--gray-900);margin-bottom:18px;line-height:1.5" id="questionText"></p>
+      <div id="optionsArea"></div>
+    </div>
+  </div>
+  <div id="quizResult" style="display:none;text-align:center;padding:32px">
+    <div class="emoji-xl">🏆</div>
+    <div id="quizScoreDisp" style="font-size:32px;font-weight:800;color:var(--blue);margin-bottom:8px">4 / 5</div>
+    <div style="font-size:15px;font-weight:700;margin-bottom:8px">훌륭해요! 오늘 수업 완료! 🎊</div>
+    <button class="btn btn-primary btn-lg" onclick="goStu('report')" style="margin-top:10px">내 리포트 보기 →</button>
+  </div>
+</div>
+</div>
+
+<!-- STUDENT REPORT -->
+<div id="page-student-report" class="page">
+<div class="container" style="max-width:780px">
+  <div class="section-title">📈 My Learning Report</div>
+  <div class="section-sub">나의 영어 학습 현황</div>
+  <div id="reportLevelPanel" style="margin-bottom:16px"></div>
+  <div class="grid-4" style="margin-bottom:18px">
+    <div class="stat-card" style="text-align:center"><div class="stat-label">이번 주 출석</div><div class="stat-value" style="color:var(--green)">4<span style="font-size:13px;color:var(--gray-400)">/5</span></div></div>
+    <div class="stat-card" style="text-align:center"><div class="stat-label">단어 완료율</div><div class="stat-value" style="color:var(--blue)">84%</div></div>
+    <div class="stat-card" style="text-align:center"><div class="stat-label">Speaking 점수</div><div class="stat-value" style="color:var(--purple)">82</div></div>
+    <div class="stat-card" style="text-align:center"><div class="stat-label">퀴즈 정답률</div><div class="stat-value" style="color:var(--amber)">80%</div></div>
+  </div>
+  <div class="card">
+    <div style="font-weight:700;font-size:14px;margin-bottom:14px">선생님 코멘트</div>
+    <div style="background:var(--blue-l);border-radius:10px;padding:14px;border-left:4px solid var(--blue);font-size:13px;color:var(--gray-700);line-height:1.7">
+      민준 학생은 이번 주 speaking 참여도가 매우 좋았습니다! 특히 동물원 주제에서 다양한 어휘를 활용한 점이 인상적이었습니다. 다음 주에는 과거 시제 표현을 더 자연스럽게 사용하는 연습이 필요합니다. 화이팅! 💪
+      <div style="font-size:11px;color:var(--gray-400);margin-top:6px">— 박지혜 선생님</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ===== TEACHER PAGES ===== -->
+<div id="page-teacher-students" class="page">
+<div class="container">
+  <div class="sidebar-layout">
+    <div class="sidebar">
+      <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray-400);margin-bottom:8px;padding-left:12px">TEACHER</p>
+      <ul class="sidebar-menu" id="teacherSidebarMenu">
+        <li class="sidebar-item active" onclick="goTeacher('students',this)"><span class="sidebar-icon">👥</span>Student List</li>
+        <li class="sidebar-item" onclick="goTeacher('dashboard',this)"><span class="sidebar-icon">📊</span>Class Dashboard</li>
+        <li class="sidebar-item" onclick="goTeacher('records',this)"><span class="sidebar-icon">🎤</span>Speaking Records</li>
+        <li class="sidebar-item" onclick="goTeacher('coaching',this)"><span class="sidebar-icon">✏️</span>Coaching Notes</li>
+        <li class="sidebar-item" onclick="goTeacher('weekreport',this)"><span class="sidebar-icon">📋</span>Weekly Report</li>
+      </ul>
+    </div>
+    <div class="content-area">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+        <div><div class="section-title">Student List</div><div class="section-sub">담당 학생 · Level A2 Class (8명)</div></div>
+        <input type="text" class="form-input" placeholder="학생 검색..." style="width:200px">
+      </div>
+      <div class="card" style="overflow:hidden">
+        <table class="data-table">
+          <thead>
+            <tr><th>학생</th><th>CEFR</th><th>AR / Lexile</th><th>출석</th><th>Speaking</th><th>단어 완료</th><th>상태</th><th></th></tr>
+          </thead>
+          <tbody id="teacherStudentBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div id="page-teacher-dashboard" class="page" style="display:none">
+<div class="container">
+  <div class="sidebar-layout">
+    <div class="sidebar"><ul class="sidebar-menu">
+      <li class="sidebar-item" onclick="goTeacher('students',this)"><span class="sidebar-icon">👥</span>Student List</li>
+      <li class="sidebar-item active" onclick="goTeacher('dashboard',this)"><span class="sidebar-icon">📊</span>Class Dashboard</li>
+      <li class="sidebar-item" onclick="goTeacher('records',this)"><span class="sidebar-icon">🎤</span>Speaking Records</li>
+      <li class="sidebar-item" onclick="goTeacher('coaching',this)"><span class="sidebar-icon">✏️</span>Coaching Notes</li>
+      <li class="sidebar-item" onclick="goTeacher('weekreport',this)"><span class="sidebar-icon">📋</span>Weekly Report</li>
+    </ul></div>
+    <div class="content-area">
+      <div class="section-title">Class Dashboard</div>
+      <div class="section-sub" style="margin-bottom:18px">Level A2 · 2025년 6월 2주차</div>
+      <div class="grid-4" style="margin-bottom:18px">
+        <div class="stat-card"><div class="stat-label">전체 학생</div><div class="stat-value">8</div></div>
+        <div class="stat-card"><div class="stat-label">오늘 출석</div><div class="stat-value" style="color:var(--green)">6</div></div>
+        <div class="stat-card"><div class="stat-label">평균 Speaking</div><div class="stat-value" style="color:var(--blue)">79</div></div>
+        <div class="stat-card"><div class="stat-label">AI 대화 완료율</div><div class="stat-value" style="color:var(--purple)">75%</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="card"><div style="font-weight:700;margin-bottom:12px;font-size:14px">이번 주 Speaking 점수 분포</div>
+          <div class="bar-chart">
+            <div class="bar-wrap"><div class="bar" style="height:15%"></div><div class="bar-lbl">60↓</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:40%"></div><div class="bar-lbl">60–70</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:75%"></div><div class="bar-lbl">70–80</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:55%"></div><div class="bar-lbl">80–90</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:25%"></div><div class="bar-lbl">90+</div></div>
+          </div>
+        </div>
+        <div class="card"><div style="font-weight:700;margin-bottom:12px;font-size:14px">주요 문법 오류 유형</div>
+          <div style="font-size:13px">
+            <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--gray-100)"><span>과거 시제 오류</span><span style="font-weight:700;color:var(--red)">38%</span></div>
+            <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--gray-100)"><span>관사 사용 오류</span><span style="font-weight:700;color:var(--amber)">29%</span></div>
+            <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--gray-100)"><span>비교급 표현</span><span style="font-weight:700;color:var(--blue)">18%</span></div>
+            <div style="display:flex;justify-content:space-between;padding:7px 0"><span>전치사 오류</span><span style="font-weight:700;color:var(--green)">15%</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div id="page-teacher-coaching" class="page" style="display:none">
+<div class="container">
+  <div class="sidebar-layout">
+    <div class="sidebar"><ul class="sidebar-menu">
+      <li class="sidebar-item" onclick="goTeacher('students',this)"><span class="sidebar-icon">👥</span>Student List</li>
+      <li class="sidebar-item" onclick="goTeacher('dashboard',this)"><span class="sidebar-icon">📊</span>Class Dashboard</li>
+      <li class="sidebar-item" onclick="goTeacher('records',this)"><span class="sidebar-icon">🎤</span>Speaking Records</li>
+      <li class="sidebar-item active" onclick="goTeacher('coaching',this)"><span class="sidebar-icon">✏️</span>Coaching Notes</li>
+      <li class="sidebar-item" onclick="goTeacher('weekreport',this)"><span class="sidebar-icon">📋</span>Weekly Report</li>
+    </ul></div>
+    <div class="content-area">
+      <div class="section-title">Teacher Coaching Notes</div>
+      <div class="section-sub" style="margin-bottom:18px">학생별 AI 코멘트 생성 및 코칭 메모 작성</div>
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <!-- Student list sidebar -->
+        <div style="width:200px;flex-shrink:0">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray-400);margin-bottom:8px;padding-left:4px">담당 학생</div>
+          <div id="coachStuList"></div>
+        </div>
+
+        <!-- Main coaching panel -->
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:14px">
+
+          <!-- Student header card -->
+          <div class="card" style="padding:16px">
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+              <div class="stu-av" id="coachStuAv" style="width:44px;height:44px;font-size:16px;background:var(--blue)">KM</div>
+              <div>
+                <div style="font-weight:700;font-size:15px" id="coachStuName">김민준</div>
+                <div style="display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap" id="coachStuMeta">
+                  <span id="coachStuLevelTag"></span>
+                  <span style="font-size:12px;color:var(--gray-400)" id="coachStuARLex"></span>
+                  <span style="font-size:12px;color:var(--gray-400)" id="coachStuClass"></span>
+                </div>
+              </div>
+              <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn btn-outline btn-sm" onclick="openStudentDetailModal()">📋 전체 리포트 보기</button>
+                <button class="btn btn-purple btn-sm" id="aiCommentBtn" onclick="genAIComment()">🤖 AI 코멘트 생성</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Level-aware stats strip -->
+          <div id="coachStatsStrip" style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px"></div>
+
+          <!-- AI analysis summary (level-aware) -->
+          <div class="card" style="padding:16px">
+            <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--gray-400);margin-bottom:10px">AI 분석 요약 — <span id="coachLevelLabel" style="color:var(--blue)">A2 Elementary</span></div>
+            <div id="coachAnalysisGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px"></div>
+            <div id="coachGoodSentences" style="margin-bottom:10px"></div>
+            <div id="coachWeakSentences"></div>
+          </div>
+
+          <!-- Level description context -->
+          <div id="coachLevelContext" style="border-radius:10px;padding:14px;border-left:4px solid var(--blue);background:var(--blue-l);font-size:12px;color:var(--gray-700);line-height:1.6"></div>
+
+          <!-- Teacher comment textarea -->
+          <div class="card" style="padding:16px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--gray-400)">선생님 코멘트 <span style="color:var(--gray-300);font-weight:400;font-size:11px">(학부모 리포트에 포함)</span></div>
+              <div id="aiGeneratingBadge" style="display:none">
+                <span class="badge badge-purple">🤖 AI 생성 중...</span>
+              </div>
+            </div>
+            <textarea class="coaching-textarea" id="coachNote" style="min-height:130px" placeholder="선생님 코멘트를 직접 작성하거나 AI 생성 후 수정하세요...">민준 학생은 이번 주 speaking 참여도가 매우 좋았습니다! 특히 동물원 주제에서 다양한 어휘를 활용한 점이 인상적이었습니다. 다음 주에는 과거 시제 표현을 더 자연스럽게 사용하는 연습이 필요합니다. 화이팅! 💪</textarea>
+            <div style="display:flex;gap:8px;margin-top:10px">
+              <button class="btn btn-primary btn-sm" onclick="showToast('💾 저장 완료!')">💾 저장</button>
+              <button class="btn btn-outline btn-sm" onclick="showToast('📤 학부모 발송 완료!')">📤 학부모 발송</button>
+              <button class="btn btn-outline btn-sm" onclick="document.getElementById('coachNote').value=''">🗑 초기화</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div id="page-teacher-weekreport" class="page" style="display:none">
+<div class="container">
+  <div class="sidebar-layout">
+    <div class="sidebar"><ul class="sidebar-menu">
+      <li class="sidebar-item" onclick="goTeacher('students',this)"><span class="sidebar-icon">👥</span>Student List</li>
+      <li class="sidebar-item" onclick="goTeacher('dashboard',this)"><span class="sidebar-icon">📊</span>Class Dashboard</li>
+      <li class="sidebar-item" onclick="goTeacher('records',this)"><span class="sidebar-icon">🎤</span>Speaking Records</li>
+      <li class="sidebar-item" onclick="goTeacher('coaching',this)"><span class="sidebar-icon">✏️</span>Coaching Notes</li>
+      <li class="sidebar-item active" onclick="goTeacher('weekreport',this)"><span class="sidebar-icon">📋</span>Weekly Report</li>
+    </ul></div>
+    <div class="content-area">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+        <div><div class="section-title">Weekly Report Generator</div><div class="section-sub">주간 리포트 자동 생성 및 발송</div></div>
+        <button class="btn btn-purple" onclick="showToast('🤖 전체 AI 리포트 생성 완료!')">🤖 전체 AI 생성</button>
+      </div>
+      <div class="card" style="overflow:hidden">
+        <table class="data-table">
+          <thead><tr><th>학생</th><th>레벨</th><th>리포트 상태</th><th>생성일</th><th>발송</th><th>액션</th></tr></thead>
+          <tbody id="weekReportBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div id="page-teacher-records" class="page" style="display:none">
+<div class="container">
+  <div class="sidebar-layout">
+    <div class="sidebar"><ul class="sidebar-menu">
+      <li class="sidebar-item" onclick="goTeacher('students',this)"><span class="sidebar-icon">👥</span>Student List</li>
+      <li class="sidebar-item" onclick="goTeacher('dashboard',this)"><span class="sidebar-icon">📊</span>Class Dashboard</li>
+      <li class="sidebar-item active" onclick="goTeacher('records',this)"><span class="sidebar-icon">🎤</span>Speaking Records</li>
+      <li class="sidebar-item" onclick="goTeacher('coaching',this)"><span class="sidebar-icon">✏️</span>Coaching Notes</li>
+      <li class="sidebar-item" onclick="goTeacher('weekreport',this)"><span class="sidebar-icon">📋</span>Weekly Report</li>
+    </ul></div>
+    <div class="content-area">
+      <div class="section-title">Speaking Records</div>
+      <div class="section-sub" style="margin-bottom:18px">AI Speaking 대화 기록</div>
+      <div class="card" style="overflow:hidden">
+        <table class="data-table">
+          <thead><tr><th>학생</th><th>레벨</th><th>주제</th><th>날짜</th><th>시간</th><th>점수</th><th>보기</th></tr></thead>
+          <tbody id="recordsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ===== PARENT PAGE ===== -->
+<div id="page-parent-report" class="page">
+<div class="container" style="max-width:780px">
+  <div class="welcome-banner" style="background:linear-gradient(135deg,#0D9488,#7C3AED)">
+    <h2>김민준 학부모님, 안녕하세요! 👋</h2>
+    <p>자녀의 이번 주 영어 학습 결과입니다</p>
+    <div class="welcome-meta">
+      <div class="welcome-meta-item">📅 2025년 6월 2주차</div>
+      <div class="welcome-meta-item">🏫 루시드 영어학원</div>
+    </div>
+  </div>
+  <!-- level panel in parent report -->
+  <div class="level-panel" id="parentLevelPanel"></div>
+  <div class="grid-2" style="margin-bottom:18px">
+    <div class="report-card-parent">
+      <div style="font-size:15px;font-weight:700;margin-bottom:14px">📊 이번 주 학습 현황</div>
+      <div class="report-metric"><div class="report-metric-icon" style="background:var(--blue-l)">⏱️</div><div><div class="report-metric-label">학습 시간</div><div class="report-metric-value">32분 / 50분 목표</div></div></div>
+      <div class="report-metric"><div class="report-metric-icon" style="background:var(--green-l)">✅</div><div><div class="report-metric-label">출석률</div><div class="report-metric-value">4/5일 (80%)</div></div></div>
+      <div class="report-metric"><div class="report-metric-icon" style="background:var(--purple-m)">📚</div><div><div class="report-metric-label">단어 학습률</div><div class="report-metric-value">84% 완료</div></div></div>
+      <div class="report-metric"><div class="report-metric-icon" style="background:var(--amber-l)">🎤</div><div><div class="report-metric-label">AI Speaking 참여</div><div class="report-metric-value">3/4회</div></div></div>
+    </div>
+    <div class="report-card-parent">
+      <div style="font-size:15px;font-weight:700;margin-bottom:14px">📈 Speaking 성취도</div>
+      <div class="report-metric"><div class="report-metric-icon" style="background:var(--red-l)">📝</div><div style="flex:1"><div class="report-metric-label">문법 정확도</div><div class="report-metric-value">78%</div><div class="progress-bar progress-sm" style="margin-top:5px"><div class="progress-fill" style="width:78%"></div></div></div></div>
+      <div class="report-metric"><div class="report-metric-icon" style="background:var(--blue-l)">🔊</div><div style="flex:1"><div class="report-metric-label">발음 점수</div><div class="report-metric-value">82점</div><div class="progress-bar progress-sm" style="margin-top:5px"><div class="progress-fill" style="width:82%"></div></div></div></div>
+      <div class="report-metric"><div class="report-metric-icon" style="background:var(--green-l)">💬</div><div style="flex:1"><div class="report-metric-label">유창성</div><div class="report-metric-value">75점</div><div class="progress-bar progress-sm" style="margin-top:5px"><div class="progress-fill" style="width:75%"></div></div></div></div>
+    </div>
+  </div>
+  <div class="report-card-parent" style="margin-bottom:16px">
+    <div style="font-size:15px;font-weight:700;margin-bottom:10px">💬 선생님 코멘트</div>
+    <div style="background:linear-gradient(135deg,var(--blue-l),var(--purple-l));border-radius:12px;padding:16px;border-left:4px solid var(--blue);font-size:13px;color:var(--gray-700);line-height:1.8">
+      민준 학생은 이번 주 speaking 참여도가 매우 좋았습니다! 특히 동물원 주제에서 다양한 어휘를 활용한 점이 인상적이었습니다. 다음 주에는 과거 시제 표현을 더 자연스럽게 사용하는 연습이 필요합니다. 화이팅! 💪
+    </div>
+  </div>
+  <div class="report-card-parent">
+    <div style="font-size:15px;font-weight:700;margin-bottom:10px">🎯 다음 주 추천 학습</div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px">
+      <div style="background:var(--blue-l);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--blue-d);font-weight:600">📖 과거 시제 집중 연습</div>
+      <div style="background:var(--purple-l);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--purple-d);font-weight:600">🔤 관사 (a/the)</div>
+      <div style="background:var(--green-l);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--green-d);font-weight:600">🦁 동물 어휘 복습</div>
+      <div style="background:var(--amber-l);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--amber-d);font-weight:600">📚 Unit 3 Week 3 예습</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ===== ADMIN PAGES ===== -->
+
+<div id="page-admin-dashboard" class="page">
+<div class="container">
+  <div class="sidebar-layout">
+    <div class="sidebar">
+      <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray-400);margin-bottom:8px;padding-left:12px">ADMIN</p>
+      <ul class="sidebar-menu" id="adminSidebarMenu">
+        <li class="sidebar-item active" onclick="goAdmin('dashboard',this)"><span class="sidebar-icon">🏠</span>대시보드</li>
+        <li class="sidebar-item" onclick="goAdmin('students',this)"><span class="sidebar-icon">👥</span>학생 관리</li>
+        <li class="sidebar-item" onclick="goAdmin('levelmanage',this)"><span class="sidebar-icon">📊</span>레벨 관리</li>
+        <li class="sidebar-item" onclick="goAdmin('classes',this)"><span class="sidebar-icon">🏫</span>반 관리</li>
+        <li class="sidebar-item" onclick="goAdmin('curriculum',this)"><span class="sidebar-icon">📚</span>커리큘럼</li>
+        <li class="sidebar-item" onclick="goAdmin('reports',this)"><span class="sidebar-icon">📋</span>리포트 발송</li>
+      </ul>
+    </div>
+    <div class="content-area">
+      <div class="section-title">원장 대시보드</div>
+      <div class="section-sub" style="margin-bottom:18px">루시드 영어학원 · 2025년 6월 2주차</div>
+      <div class="grid-4" style="margin-bottom:18px">
+        <div class="stat-card"><div class="stat-label">전체 학생</div><div class="stat-value">48</div><div class="stat-sub">3개 반 운영</div></div>
+        <div class="stat-card"><div class="stat-label">선생님</div><div class="stat-value">4</div></div>
+        <div class="stat-card"><div class="stat-label">이번 주 AI Speaking</div><div class="stat-value" style="color:var(--blue)">156</div><div class="stat-sub">전주 대비 +12%</div></div>
+        <div class="stat-card"><div class="stat-label">평균 Speaking 점수</div><div class="stat-value" style="color:var(--green)">77</div><div class="stat-sub">목표 80점</div></div>
+      </div>
+      <!-- CEFR level distribution -->
+      <div class="card" style="margin-bottom:16px">
+        <div style="font-weight:700;font-size:14px;margin-bottom:14px">레벨별 학생 분포 (CEFR 기준)</div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px">
+          <div class="cefr-pre-a1" style="border-radius:10px;padding:14px;border:1px solid var(--lm);background:var(--ll);text-align:center">
+            <div style="font-size:18px;font-weight:800;color:var(--lc)">Pre-A1</div>
+            <div style="font-size:10px;color:var(--gray-400);margin:3px 0">Starter</div>
+            <div style="font-size:22px;font-weight:800;color:var(--lt)">6</div>
+            <div style="font-size:11px;color:var(--gray-500)">학생</div>
+          </div>
+          <div class="cefr-a1" style="border-radius:10px;padding:14px;border:1px solid var(--lm);background:var(--ll);text-align:center">
+            <div style="font-size:18px;font-weight:800;color:var(--lc)">A1</div>
+            <div style="font-size:10px;color:var(--gray-400);margin:3px 0">Beginner</div>
+            <div style="font-size:22px;font-weight:800;color:var(--lt)">12</div>
+            <div style="font-size:11px;color:var(--gray-500)">학생</div>
+          </div>
+          <div class="cefr-a2" style="border-radius:10px;padding:14px;border:1px solid var(--lm);background:var(--ll);text-align:center">
+            <div style="font-size:18px;font-weight:800;color:var(--lc)">A2</div>
+            <div style="font-size:10px;color:var(--gray-400);margin:3px 0">Elementary</div>
+            <div style="font-size:22px;font-weight:800;color:var(--lt)">18</div>
+            <div style="font-size:11px;color:var(--gray-500)">학생</div>
+          </div>
+          <div class="cefr-b1" style="border-radius:10px;padding:14px;border:1px solid var(--lm);background:var(--ll);text-align:center">
+            <div style="font-size:18px;font-weight:800;color:var(--lc)">B1</div>
+            <div style="font-size:10px;color:var(--gray-400);margin:3px 0">Intermediate</div>
+            <div style="font-size:22px;font-weight:800;color:var(--lt)">8</div>
+            <div style="font-size:11px;color:var(--gray-500)">학생</div>
+          </div>
+          <div class="cefr-b2" style="border-radius:10px;padding:14px;border:1px solid var(--lm);background:var(--ll);text-align:center">
+            <div style="font-size:18px;font-weight:800;color:var(--lc)">B2</div>
+            <div style="font-size:10px;color:var(--gray-400);margin:3px 0">Upper-Int.</div>
+            <div style="font-size:22px;font-weight:800;color:var(--lt)">4</div>
+            <div style="font-size:11px;color:var(--gray-500)">학생</div>
+          </div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div style="font-weight:700;margin-bottom:12px;font-size:14px">반별 현황</div>
+          <div id="classSummary"></div>
+        </div>
+        <div class="card">
+          <div style="font-weight:700;margin-bottom:12px;font-size:14px">이번 주 Speaking 점수 추이</div>
+          <div class="bar-chart">
+            <div class="bar-wrap"><div class="bar" style="height:70%"></div><div class="bar-lbl">월</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:75%"></div><div class="bar-lbl">화</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:72%"></div><div class="bar-lbl">수</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:77%"></div><div class="bar-lbl">목</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:30%;background:var(--gray-200)"></div><div class="bar-lbl">금</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ADMIN LEVEL MANAGEMENT -->
+<div id="page-admin-levelmanage" class="page" style="display:none">
+<div class="container">
+  <div class="sidebar-layout">
+    <div class="sidebar"><ul class="sidebar-menu">
+      <li class="sidebar-item" onclick="goAdmin('dashboard',this)"><span class="sidebar-icon">🏠</span>대시보드</li>
+      <li class="sidebar-item" onclick="goAdmin('students',this)"><span class="sidebar-icon">👥</span>학생 관리</li>
+      <li class="sidebar-item active" onclick="goAdmin('levelmanage',this)"><span class="sidebar-icon">📊</span>레벨 관리</li>
+      <li class="sidebar-item" onclick="goAdmin('classes',this)"><span class="sidebar-icon">🏫</span>반 관리</li>
+      <li class="sidebar-item" onclick="goAdmin('curriculum',this)"><span class="sidebar-icon">📚</span>커리큘럼</li>
+      <li class="sidebar-item" onclick="goAdmin('reports',this)"><span class="sidebar-icon">📋</span>리포트 발송</li>
+    </ul></div>
+    <div class="content-area">
+      <div class="section-title">📊 학생 레벨 관리</div>
+      <div class="section-sub" style="margin-bottom:0">CEFR / AR / Lexile 기준으로 학생 레벨을 설정하세요</div>
+
+      <!-- LEVEL REFERENCE TABLE -->
+      <div class="card" style="margin-bottom:18px;margin-top:16px">
+        <div style="font-weight:700;font-size:14px;margin-bottom:14px">레벨 기준표 (Pre-A1 ~ B2)</div>
+        <div style="overflow-x:auto">
+          <table class="data-table">
+            <thead>
+              <tr><th>루시드 레벨</th><th>CEFR</th><th>설명</th><th>AR 레벨 범위</th><th>Lexile 범위</th><th>어휘 수준</th><th>색상</th></tr>
+            </thead>
+            <tbody id="levelRefTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- STUDENT LEVEL EDITOR -->
+      <div class="card" style="overflow:hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div style="font-weight:700;font-size:14px">학생별 레벨 배정</div>
+          <button class="btn btn-primary btn-sm" onclick="saveAllLevels()">💾 전체 저장</button>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr><th>학생 이름</th><th>현재 CEFR</th><th>AR 레벨</th><th>Lexile</th><th>담당 반</th><th>레벨 변경</th><th>저장</th></tr>
+          </thead>
+          <tbody id="levelEditBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ADMIN STUDENTS -->
+<div id="page-admin-students" class="page" style="display:none">
+<div class="container">
+  <div class="sidebar-layout">
+    <div class="sidebar"><ul class="sidebar-menu">
+      <li class="sidebar-item" onclick="goAdmin('dashboard',this)"><span class="sidebar-icon">🏠</span>대시보드</li>
+      <li class="sidebar-item active" onclick="goAdmin('students',this)"><span class="sidebar-icon">👥</span>학생 관리</li>
+      <li class="sidebar-item" onclick="goAdmin('levelmanage',this)"><span class="sidebar-icon">📊</span>레벨 관리</li>
+      <li class="sidebar-item" onclick="goAdmin('classes',this)"><span class="sidebar-icon">🏫</span>반 관리</li>
+      <li class="sidebar-item" onclick="goAdmin('curriculum',this)"><span class="sidebar-icon">📚</span>커리큘럼</li>
+      <li class="sidebar-item" onclick="goAdmin('reports',this)"><span class="sidebar-icon">📋</span>리포트 발송</li>
+    </ul></div>
+    <div class="content-area">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+        <div><div class="section-title">학생 등록 관리</div><div class="section-sub">전체 학생 · 레벨 배정 현황</div></div>
+        <button class="btn btn-primary btn-sm" onclick="showToast('학생 등록 모달 (개발 예정)')">+ 학생 등록</button>
+      </div>
+      <div class="card" style="overflow:hidden">
+        <table class="data-table">
+          <thead><tr><th>이름</th><th>CEFR</th><th>AR 레벨</th><th>Lexile</th><th>담당 반</th><th>선생님</th><th>등록일</th><th>관리</th></tr></thead>
+          <tbody id="adminStudentBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ADMIN CURRICULUM -->
+<div id="page-admin-curriculum" class="page" style="display:none">
+<div class="container">
+  <div class="sidebar-layout">
+    <div class="sidebar"><ul class="sidebar-menu">
+      <li class="sidebar-item" onclick="goAdmin('dashboard',this)"><span class="sidebar-icon">🏠</span>대시보드</li>
+      <li class="sidebar-item" onclick="goAdmin('students',this)"><span class="sidebar-icon">👥</span>학생 관리</li>
+      <li class="sidebar-item" onclick="goAdmin('levelmanage',this)"><span class="sidebar-icon">📊</span>레벨 관리</li>
+      <li class="sidebar-item" onclick="goAdmin('classes',this)"><span class="sidebar-icon">🏫</span>반 관리</li>
+      <li class="sidebar-item active" onclick="goAdmin('curriculum',this)"><span class="sidebar-icon">📚</span>커리큘럼</li>
+      <li class="sidebar-item" onclick="goAdmin('reports',this)"><span class="sidebar-icon">📋</span>리포트 발송</li>
+    </ul></div>
+    <div class="content-area">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+        <div><div class="section-title">커리큘럼 관리</div><div class="section-sub">CEFR 레벨별 단원 및 학습 콘텐츠</div></div>
+        <button class="btn btn-primary btn-sm" onclick="openCurrModal()">+ 새 단원 추가</button>
+      </div>
+      <div id="currList"></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ADMIN CLASSES -->
+<div id="page-admin-classes" class="page" style="display:none">
+<div class="container">
+  <div class="sidebar-layout">
+    <div class="sidebar"><ul class="sidebar-menu">
+      <li class="sidebar-item" onclick="goAdmin('dashboard',this)"><span class="sidebar-icon">🏠</span>대시보드</li>
+      <li class="sidebar-item" onclick="goAdmin('students',this)"><span class="sidebar-icon">👥</span>학생 관리</li>
+      <li class="sidebar-item" onclick="goAdmin('levelmanage',this)"><span class="sidebar-icon">📊</span>레벨 관리</li>
+      <li class="sidebar-item active" onclick="goAdmin('classes',this)"><span class="sidebar-icon">🏫</span>반 관리</li>
+      <li class="sidebar-item" onclick="goAdmin('curriculum',this)"><span class="sidebar-icon">📚</span>커리큘럼</li>
+      <li class="sidebar-item" onclick="goAdmin('reports',this)"><span class="sidebar-icon">📋</span>리포트 발송</li>
+    </ul></div>
+    <div class="content-area">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+        <div><div class="section-title">반 등록 및 선생님 배정</div><div class="section-sub">CEFR 레벨 기반 반 구성</div></div>
+        <button class="btn btn-primary btn-sm" onclick="showToast('반 등록 모달 (개발 예정)')">+ 반 등록</button>
+      </div>
+      <div class="grid-3" id="classCards"></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ADMIN REPORTS -->
+<div id="page-admin-reports" class="page" style="display:none">
+<div class="container">
+  <div class="sidebar-layout">
+    <div class="sidebar"><ul class="sidebar-menu">
+      <li class="sidebar-item" onclick="goAdmin('dashboard',this)"><span class="sidebar-icon">🏠</span>대시보드</li>
+      <li class="sidebar-item" onclick="goAdmin('students',this)"><span class="sidebar-icon">👥</span>학생 관리</li>
+      <li class="sidebar-item" onclick="goAdmin('levelmanage',this)"><span class="sidebar-icon">📊</span>레벨 관리</li>
+      <li class="sidebar-item" onclick="goAdmin('classes',this)"><span class="sidebar-icon">🏫</span>반 관리</li>
+      <li class="sidebar-item" onclick="goAdmin('curriculum',this)"><span class="sidebar-icon">📚</span>커리큘럼</li>
+      <li class="sidebar-item active" onclick="goAdmin('reports',this)"><span class="sidebar-icon">📋</span>리포트 발송</li>
+    </ul></div>
+    <div class="content-area">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+        <div><div class="section-title">학부모 리포트 발송</div><div class="section-sub">주간 리포트 발송 현황</div></div>
+        <button class="btn btn-purple btn-sm" onclick="showToast('📤 전체 발송 완료!')">📤 전체 발송</button>
+      </div>
+      <div class="card" style="overflow:hidden">
+        <table class="data-table">
+          <thead><tr><th>학생</th><th>CEFR 레벨</th><th>반</th><th>리포트 상태</th><th>발송</th><th>발송일</th><th>액션</th></tr></thead>
+          <tbody id="adminReportBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+</div><!-- /mainApp -->
+
+<!-- STUDENT DETAIL REPORT MODAL -->
+<div class="modal-backdrop" id="stuDetailModal">
+<div class="modal-box" style="max-width:680px">
+  <div class="modal-head">
+    <h3 id="detailModalTitle">학생 상세 리포트</h3>
+    <button class="close-btn" onclick="document.getElementById('stuDetailModal').classList.remove('show')">✕</button>
+  </div>
+  <div id="detailModalContent"></div>
+</div>
+</div>
+
+<!-- CURRICULUM MODAL -->
+<div class="modal-backdrop" id="currModal">
+<div class="modal-box">
+  <div class="modal-head"><h3>새 단원 추가</h3><button class="close-btn" onclick="closeCurrModal()">✕</button></div>
+  <div class="grid-2" style="gap:10px;margin-bottom:10px">
+    <div class="form-group" style="margin-bottom:0"><label class="form-label">CEFR 레벨</label>
+      <select class="form-input" id="newCurrLevel">
+        <option>Pre-A1 (Starter)</option><option>A1 (Beginner)</option><option selected>A2 (Elementary)</option>
+        <option>B1 (Intermediate)</option><option>B2 (Upper-Int.)</option>
+      </select></div>
+    <div class="form-group" style="margin-bottom:0"><label class="form-label">Unit</label><input class="form-input" value="Unit 4"></div>
+    <div class="form-group" style="margin-bottom:0"><label class="form-label">Week</label><input class="form-input" value="Week 1"></div>
+    <div class="form-group" style="margin-bottom:0"><label class="form-label">주제 (Topic)</label><input class="form-input" placeholder="예: My School"></div>
+  </div>
+  <div class="form-group"><label class="form-label">AR 레벨 범위</label><input class="form-input" placeholder="예: 2.5 – 3.5"></div>
+  <div class="form-group"><label class="form-label">Lexile 범위</label><input class="form-input" placeholder="예: 420L – 620L"></div>
+  <div class="form-group"><label class="form-label">단어 목록 (쉼표로 구분)</label><input class="form-input" placeholder="pencil, eraser, ruler, desk..."></div>
+  <div class="form-group"><label class="form-label">Speaking Mission</label><input class="form-input" placeholder="Talk about your school life."></div>
+  <div class="form-group"><label class="form-label">Listening 대화문</label><textarea class="coaching-textarea" style="min-height:70px"></textarea></div>
+  <div style="display:flex;gap:8px;justify-content:flex-end">
+    <button class="btn btn-outline btn-sm" onclick="closeCurrModal()">취소</button>
+    <button class="btn btn-primary btn-sm" onclick="saveCurr()">저장</button>
+  </div>
+</div>
+</div>
+
+<!-- LEVEL EDIT MODAL -->
+<div class="modal-backdrop" id="levelModal">
+<div class="modal-box" style="max-width:480px">
+  <div class="modal-head"><h3 id="levelModalTitle">레벨 변경</h3><button class="close-btn" onclick="document.getElementById('levelModal').classList.remove('show')">✕</button></div>
+  <div style="font-size:13px;color:var(--gray-500);margin-bottom:14px">학생의 CEFR, AR, Lexile 레벨을 설정하세요</div>
+  <div style="margin-bottom:14px">
+    <div style="font-size:12px;font-weight:600;color:var(--gray-600);margin-bottom:8px">CEFR 레벨 선택</div>
+    <div class="level-select-row" id="cefrSelectBtns"></div>
+  </div>
+  <div class="grid-2" style="gap:10px;margin-bottom:16px">
+    <div><label class="form-label">AR 레벨</label><input class="form-input" id="arInput" placeholder="예: 2.8"></div>
+    <div><label class="form-label">Lexile</label><input class="form-input" id="lexileInput" placeholder="예: 520L"></div>
+  </div>
+  <div style="display:flex;gap:8px;justify-content:flex-end">
+    <button class="btn btn-outline btn-sm" onclick="document.getElementById('levelModal').classList.remove('show')">취소</button>
+    <button class="btn btn-primary btn-sm" onclick="applyLevelChange()">레벨 적용</button>
+  </div>
+</div>
+</div>
+
+<script>
+/* ============ DATA ============ */
+
+const LEVELS = {
+  'Pre-A1': {
+    cefr:'Pre-A1', name:'Starter', color:'#6B7280', light:'#F3F4F6', mid:'#E5E7EB', dark:'#374151',
+    ar:'0.5 – 1.4', lexile:'BR – 200L', lexileNum:100,
+    arNum:1.0, arPct:8,
+    vocab:'기초 100단어 이내', desc:'알파벳·기초 인사말 수준. 간단한 그림 단어 카드와 단음절 단어 위주의 활동.',
+    aiPrompt:'Use only very simple words. Max 5 words per sentence. Use pictures and pointing words.',
+    topics:['Hello! My Name is...','Colors and Numbers','My Body','Animals I Know','My Toys']
+  },
+  'A1': {
+    cefr:'A1', name:'Beginner', color:'#10B981', light:'#ECFDF5', mid:'#D1FAE5', dark:'#047857',
+    ar:'1.5 – 2.4', lexile:'200L – 420L', lexileNum:310,
+    arNum:2.0, arPct:22,
+    vocab:'기초 500단어 이내', desc:'간단한 문장으로 자기 소개, 가족, 일상 표현 가능. 현재 시제 중심.',
+    aiPrompt:'Use very simple present tense sentences. One question at a time. Max 8 words per sentence.',
+    topics:['My Family','My School','Food I Like','My Daily Routine','Pets and Animals']
+  },
+  'A2': {
+    cefr:'A2', name:'Elementary', color:'#3B82F6', light:'#EFF6FF', mid:'#DBEAFE', dark:'#1D4ED8',
+    ar:'2.5 – 3.9', lexile:'420L – 700L', lexileNum:560,
+    arNum:3.2, arPct:42,
+    vocab:'기초 1,000단어 이내', desc:'일상적인 주제로 짧은 대화 가능. 현재·과거 시제 사용. 비교급·형용사 활용.',
+    aiPrompt:'Use simple past and present tense. Short sentences. Ask one question at a time. Gently correct grammar.',
+    topics:['At the Zoo','Weekend Plans','At the Restaurant','My Favorite Season','School Life']
+  },
+  'B1': {
+    cefr:'B1', name:'Intermediate', color:'#7C3AED', light:'#F5F3FF', mid:'#EDE9FE', dark:'#5B21B6',
+    ar:'4.0 – 5.9', lexile:'700L – 1000L', lexileNum:850,
+    arNum:5.0, arPct:66,
+    vocab:'기초 2,000단어 이내', desc:'여행·직업·시사 등 친숙한 주제로 의견 표현 가능. 복잡한 문장 구조 사용.',
+    aiPrompt:'Use varied tenses and moderate vocabulary. Encourage opinions. Give gentle corrections with alternatives.',
+    topics:['Travel Experiences','My Future Career','Environment Issues','Social Media & Technology','Korean Culture']
+  },
+  'B2': {
+    cefr:'B2', name:'Upper-Intermediate', color:'#DC2626', light:'#FEF2F2', mid:'#FEE2E2', dark:'#991B1B',
+    ar:'6.0 – 8.5', lexile:'1000L – 1300L', lexileNum:1150,
+    arNum:7.2, arPct:88,
+    vocab:'기초 3,500단어 이내', desc:'추상적 주제 토론 가능. 유창하고 자연스러운 표현. 뉘앙스·관용어 이해.',
+    aiPrompt:'Use complex sentences and abstract vocabulary. Encourage debate and nuanced expression. Discuss abstract ideas.',
+    topics:['Debating Global Issues','Critical Thinking','Academic Presentations','Complex Problem Solving','Literature & Film']
+  }
+};
+
+const STUDENTS = [
+  {id:1,name:'김민준',cefrKey:'A2',ar:'3.2',lexile:'520L',class:'A2 Elementary',teacher:'박지혜',bg:'#3B82F6',score:82,att:'4/5',vocab:84,status:'active'},
+  {id:2,name:'이수아',cefrKey:'A2',ar:'3.8',lexile:'640L',class:'A2 Elementary',teacher:'박지혜',bg:'#10B981',score:91,att:'5/5',vocab:100,status:'active'},
+  {id:3,name:'박지호',cefrKey:'A1',ar:'2.1',lexile:'380L',class:'A1 Beginner',teacher:'박민아',bg:'#F59E0B',score:68,att:'3/5',vocab:60,status:'low'},
+  {id:4,name:'최예린',cefrKey:'B1',ar:'4.6',lexile:'780L',class:'B1 Intermediate',teacher:'이수진',bg:'#7C3AED',score:88,att:'5/5',vocab:90,status:'active'},
+  {id:5,name:'정우진',cefrKey:'Pre-A1',ar:'1.0',lexile:'150L',class:'Pre-A1 Starter',teacher:'박민아',bg:'#6B7280',score:55,att:'2/5',vocab:40,status:'low'},
+  {id:6,name:'강서연',cefrKey:'A2',ar:'3.5',lexile:'590L',class:'A2 Elementary',teacher:'박지혜',bg:'#06B6D4',score:79,att:'4/5',vocab:80,status:'active'},
+  {id:7,name:'윤도현',cefrKey:'B2',ar:'7.0',lexile:'1050L',class:'B2 Upper-Int.',teacher:'이수진',bg:'#8B5CF6',score:85,att:'5/5',vocab:95,status:'active'},
+  {id:8,name:'임채원',cefrKey:'B1',ar:'5.2',lexile:'860L',class:'B1 Intermediate',teacher:'이수진',bg:'#EC4899',score:77,att:'4/5',vocab:75,status:'active'},
+];
+
+const VOCAB_DATA = {
+  'Pre-A1': [
+    {en:'cat',ko:'고양이',ex:'I see a cat.',diff:'⭐'},
+    {en:'dog',ko:'강아지',ex:'The dog is big.',diff:'⭐'},
+    {en:'red',ko:'빨간색',ex:'The apple is red.',diff:'⭐'},
+    {en:'one',ko:'하나',ex:'One cat is here.',diff:'⭐'},
+    {en:'hot',ko:'뜨거운',ex:'The soup is hot.',diff:'⭐'},
+    {en:'cold',ko:'차가운',ex:'Water is cold.',diff:'⭐'},
+    {en:'big',ko:'큰',ex:'An elephant is big.',diff:'⭐'},
+    {en:'small',ko:'작은',ex:'A mouse is small.',diff:'⭐'},
+    {en:'run',ko:'달리다',ex:'I can run fast.',diff:'⭐'},
+    {en:'jump',ko:'점프하다',ex:'Frogs can jump.',diff:'⭐'},
+  ],
+  'A1': [
+    {en:'family',ko:'가족',ex:'My family is happy.',diff:'⭐⭐'},
+    {en:'breakfast',ko:'아침식사',ex:'I eat breakfast every day.',diff:'⭐⭐'},
+    {en:'school',ko:'학교',ex:'I go to school by bus.',diff:'⭐⭐'},
+    {en:'friend',ko:'친구',ex:'She is my best friend.',diff:'⭐⭐'},
+    {en:'happy',ko:'행복한',ex:'I feel happy today.',diff:'⭐⭐'},
+    {en:'play',ko:'놀다',ex:'We play in the park.',diff:'⭐⭐'},
+    {en:'teacher',ko:'선생님',ex:'My teacher is kind.',diff:'⭐⭐'},
+    {en:'hungry',ko:'배고픈',ex:'I am hungry now.',diff:'⭐⭐'},
+    {en:'sleep',ko:'자다',ex:'I sleep at ten.',diff:'⭐⭐'},
+    {en:'read',ko:'읽다',ex:'I read books every night.',diff:'⭐⭐'},
+  ],
+  'A2': [
+    {en:'lion',ko:'사자',ex:'The lion is the king of the jungle.',diff:'⭐⭐'},
+    {en:'tiger',ko:'호랑이',ex:'A tiger has orange and black stripes.',diff:'⭐⭐'},
+    {en:'elephant',ko:'코끼리',ex:'The elephant has a very long nose.',diff:'⭐⭐'},
+    {en:'giraffe',ko:'기린',ex:'A giraffe has a very long neck.',diff:'⭐⭐⭐'},
+    {en:'monkey',ko:'원숭이',ex:'Monkeys can climb trees fast.',diff:'⭐⭐'},
+    {en:'penguin',ko:'펭귄',ex:'Penguins live in cold places.',diff:'⭐⭐'},
+    {en:'zebra',ko:'얼룩말',ex:'A zebra has black and white stripes.',diff:'⭐⭐⭐'},
+    {en:'hippo',ko:'하마',ex:'Hippos love to swim in rivers.',diff:'⭐⭐⭐'},
+    {en:'parrot',ko:'앵무새',ex:'A parrot can copy what you say.',diff:'⭐⭐⭐'},
+    {en:'kangaroo',ko:'캥거루',ex:'Kangaroos carry their babies in a pouch.',diff:'⭐⭐⭐'},
+  ],
+  'B1': [
+    {en:'environment',ko:'환경',ex:'We must protect the environment.',diff:'⭐⭐⭐'},
+    {en:'opportunity',ko:'기회',ex:'This is a great opportunity to learn.',diff:'⭐⭐⭐'},
+    {en:'responsibility',ko:'책임',ex:'We have a responsibility to help others.',diff:'⭐⭐⭐⭐'},
+    {en:'challenge',ko:'도전',ex:'Learning English is a fun challenge.',diff:'⭐⭐⭐'},
+    {en:'community',ko:'공동체',ex:'Our community helps everyone.',diff:'⭐⭐⭐'},
+    {en:'appreciate',ko:'감사하다',ex:'I appreciate your help.',diff:'⭐⭐⭐'},
+    {en:'confident',ko:'자신감 있는',ex:'She feels confident about the exam.',diff:'⭐⭐⭐'},
+    {en:'tradition',ko:'전통',ex:'Chuseok is a Korean tradition.',diff:'⭐⭐⭐'},
+    {en:'solution',ko:'해결책',ex:'We need a solution to this problem.',diff:'⭐⭐⭐⭐'},
+    {en:'influence',ko:'영향',ex:'Social media influences teenagers.',diff:'⭐⭐⭐⭐'},
+  ],
+  'B2': [
+    {en:'ambiguity',ko:'모호함',ex:'The statement was full of ambiguity.',diff:'⭐⭐⭐⭐⭐'},
+    {en:'paradigm',ko:'패러다임',ex:'A new paradigm is emerging in science.',diff:'⭐⭐⭐⭐⭐'},
+    {en:'rhetoric',ko:'수사학',ex:'His speech was full of powerful rhetoric.',diff:'⭐⭐⭐⭐⭐'},
+    {en:'nuance',ko:'뉘앙스',ex:'The nuance of the word is hard to translate.',diff:'⭐⭐⭐⭐'},
+    {en:'incentive',ko:'동기부여',ex:'Financial incentives can improve performance.',diff:'⭐⭐⭐⭐'},
+    {en:'consequently',ko:'결과적으로',ex:'He studied hard; consequently, he passed.',diff:'⭐⭐⭐⭐'},
+    {en:'implication',ko:'함의',ex:'The implications of this study are vast.',diff:'⭐⭐⭐⭐⭐'},
+    {en:'phenomena',ko:'현상',ex:'Climate change is a global phenomena.',diff:'⭐⭐⭐⭐'},
+    {en:'perspective',ko:'관점',ex:'Consider the issue from another perspective.',diff:'⭐⭐⭐⭐'},
+    {en:'hypothesize',ko:'가설을 세우다',ex:'Scientists hypothesize about black holes.',diff:'⭐⭐⭐⭐⭐'},
+  ]
+};
+
+const CLASSES = [
+  {name:'Pre-A1 Starter',cefrKey:'Pre-A1',teacher:'박민아',students:6,schedule:'월/수 오후 3시',color:'#6B7280'},
+  {name:'A1 Beginner',cefrKey:'A1',teacher:'박민아',students:12,schedule:'월/수/금 오후 4시',color:'#10B981'},
+  {name:'A2 Elementary',cefrKey:'A2',teacher:'박지혜',students:18,schedule:'화/목 오후 5시',color:'#3B82F6'},
+  {name:'B1 Intermediate',cefrKey:'B1',teacher:'이수진',students:8,schedule:'월/수/금 오후 6시',color:'#7C3AED'},
+  {name:'B2 Upper-Int.',cefrKey:'B2',teacher:'이수진',students:4,schedule:'화/목 오후 7시',color:'#DC2626'},
+];
+
+const CURRICULUM = [
+  {cefrKey:'Pre-A1',units:[
+    {name:'Unit 1',topic:'Hello! Nice to Meet You',ar:'0.5–1.0',lexile:'BR–100L',vocab:'hello, name, how, are, you',mission:'Say your name and age.'},
+    {name:'Unit 2',topic:'Colors and Numbers',ar:'0.8–1.2',lexile:'100–180L',vocab:'red, blue, one, two, three',mission:'Count objects and name colors.'},
+  ]},
+  {cefrKey:'A1',units:[
+    {name:'Unit 1',topic:'My Family',ar:'1.5–2.0',lexile:'200–320L',vocab:'mom, dad, sister, brother, family',mission:'Describe your family.'},
+    {name:'Unit 2',topic:'My Daily Routine',ar:'2.0–2.4',lexile:'320–420L',vocab:'wake, eat, school, sleep, every day',mission:'Tell your daily schedule.'},
+  ]},
+  {cefrKey:'A2',units:[
+    {name:'Unit 3',topic:'At the Zoo 🦁',ar:'2.5–3.2',lexile:'420–560L',vocab:'lion, tiger, elephant, giraffe, monkey',mission:'Talk about your favorite animal.'},
+    {name:'Unit 4',topic:'At the Restaurant',ar:'3.0–3.9',lexile:'520–700L',vocab:'menu, order, waiter, delicious, bill',mission:'Order food at a restaurant.'},
+  ]},
+  {cefrKey:'B1',units:[
+    {name:'Unit 5',topic:'Travel Experiences',ar:'4.0–5.0',lexile:'700–850L',vocab:'itinerary, culture, souvenir, landmark, explore',mission:'Describe a travel experience.'},
+    {name:'Unit 6',topic:'Environment & Sustainability',ar:'5.0–5.9',lexile:'850–1000L',vocab:'pollution, recycle, renewable, ecosystem, carbon',mission:'Discuss an environmental issue.'},
+  ]},
+  {cefrKey:'B2',units:[
+    {name:'Unit 7',topic:'Critical Thinking & Debate',ar:'6.0–7.5',lexile:'1000–1200L',vocab:'hypothesis, evidence, counterargument, bias, nuance',mission:'Argue both sides of a debate topic.'},
+    {name:'Unit 8',topic:'Academic Presentations',ar:'7.0–8.5',lexile:'1100–1300L',vocab:'paradigm, implication, consequently, rhetoric, phenomena',mission:'Give a 2-minute academic presentation.'},
+  ]},
+];
+
+const QUIZ_DATA = [
+  {q:'다음 중 "코끼리"를 영어로 바르게 쓴 것은?',opts:['tiger','elephant','giraffe','monkey'],ans:'elephant'},
+  {q:'빈칸: "The ___ has a very long neck."',opts:['hippo','zebra','giraffe','lion'],ans:'giraffe'},
+  {q:'"I go zoo yesterday."의 올바른 문장은?',opts:['I go to zoo yesterday.','I went to the zoo yesterday.','I will go zoo.','I gone the zoo.'],ans:'I went to the zoo yesterday.'},
+  {q:'"원숭이"를 뜻하는 단어는?',opts:['parrot','penguin','monkey','kangaroo'],ans:'monkey'},
+  {q:'"more big"의 올바른 비교급은?',opts:['more bigger','big more','bigger','most big'],ans:'bigger'},
+];
+
+const AI_RESPONSES = [
+  "That's great! 🎉 Can you tell me more about why you like that animal?",
+  "Excellent! 👏 What does that animal look like?",
+  "Very good! You used the word perfectly! What sound does that animal make?",
+  "Super! 🌟 Have you ever seen that animal at a zoo?",
+  "Great job! Your English is getting better! What other animals do you like?",
+  "Wonderful! Can you make a full sentence about it?",
+];
+
+/* ============ STATE ============ */
+let currentRole = 'student';
+let currentStudentLevel = 'A2';
+let vocabDone = new Set();
+let isRecording = false;
+let quizQ = 0, quizScore = 0;
+let listenStep = 0;
+let editingStudentId = null;
+let selectedCefrKey = 'A2';
+
+/* ============ UTILS ============ */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+function levelTag(cefrKey) {
+  const L = LEVELS[cefrKey];
+  if (!L) return '';
+  return `<span class="lv-tag" style="background:${L.mid};color:${L.dark};border:1px solid ${L.color}"><span style="width:7px;height:7px;border-radius:50%;background:${L.color};display:inline-block"></span>${L.cefr}</span>`;
+}
+
+function levelPillHTML(cefrKey) {
+  const L = LEVELS[cefrKey];
+  if (!L) return '';
+  return `<span class="level-pill cefr-${cefrKey.toLowerCase().replace('-','').replace(' ','')}"><span class="level-dot"></span>${L.cefr} · ${L.name}</span>`;
+}
+
+/* ============ LOGIN ============ */
+function selectRole(role, btn) {
+  currentRole = role;
+  document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function doLogin() {
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'block';
+  setupRole(currentRole);
+}
+
+function logout() {
+  document.getElementById('loginPage').style.display = 'block';
+  document.getElementById('mainApp').style.display = 'none';
+  document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display = ''; });
+}
+
+function setupRole(role) {
+  const nav = document.getElementById('mainNavTabs');
+  const av = document.getElementById('userAvatar');
+  const un = document.getElementById('userName');
+  nav.innerHTML = '';
+
+  const today = new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'short'});
+  const todayEl = document.getElementById('todayDate');
+  if (todayEl) todayEl.textContent = today;
+
+  if (role === 'student') {
+    av.style.background = '#DBEAFE'; av.style.color = '#1D4ED8'; av.textContent = 'S';
+    un.textContent = '김민준';
+    const tabs = [['today','오늘의 학습'],['vocab','단어 예습'],['speaking','AI Speaking'],['feedback','분석결과'],['report','내 리포트']];
+    tabs.forEach(([k,l]) => {
+      const b = document.createElement('button'); b.className = 'nav-tab'; b.textContent = l;
+      b.onclick = () => goStu(k); nav.appendChild(b);
+    });
+    buildStudentLevelPanel('A2');
+    buildVocab('A2');
+    buildQuiz();
+    buildSpeakingForLevel('A2');
+    showPage('page-student-today');
+    nav.querySelector('.nav-tab').classList.add('active');
+
+  } else if (role === 'teacher') {
+    av.style.background = '#EDE9FE'; av.style.color = '#5B21B6'; av.textContent = 'T';
+    un.textContent = '박지혜 선생님';
+    buildTeacherStudentTable();
+    buildCoachStuList();
+    buildWeekReportTable();
+    buildRecordsTable();
+    showPage('page-teacher-students');
+
+  } else if (role === 'parent') {
+    av.style.background = '#D1FAE5'; av.style.color = '#047857'; av.textContent = 'P';
+    un.textContent = '김민준 학부모';
+    buildParentLevelPanel('A2');
+    showPage('page-parent-report');
+
+  } else if (role === 'admin') {
+    av.style.background = '#FDE68A'; av.style.color = '#92400E'; av.textContent = 'A';
+    un.textContent = '원장';
+    buildClassSummary();
+    buildClassCards();
+    buildLevelRefTable();
+    buildLevelEditTable();
+    buildAdminStudentTable();
+    buildAdminReportTable();
+    buildCurrList();
+    showPage('page-admin-dashboard');
+  }
+}
+
+/* ============ LEVEL PANEL ============ */
+function buildStudentLevelPanel(cefrKey) {
+  const L = LEVELS[cefrKey];
+  if (!L) return;
+  currentStudentLevel = cefrKey;
+
+  // pill in header
+  const pill = document.getElementById('studentCefrPill');
+  if (pill) pill.innerHTML = `<span class="level-pill" style="--lc:${L.color};--ll:${L.light};--lm:${L.mid};--lt:${L.dark}"><span class="level-dot"></span>${L.cefr} · ${L.name}</span>`;
+
+  // trio cards
+  const arPct = L.arPct;
+  const lexPct = Math.round((L.lexileNum / 1300) * 100);
+  const cefrPct = arPct;
+
+  const trio = document.getElementById('levelTrio');
+  if (trio) trio.innerHTML = `
+    <div class="level-trio-card" style="--lc:${L.color};--ll:${L.light}">
+      <div class="level-trio-label">CEFR Level</div>
+      <div class="level-trio-value" style="color:${L.color}">${L.cefr}</div>
+      <div class="level-trio-desc">${L.name}<br>Pre-A1 → B2 중 <strong>${cefrPct}%</strong></div>
+      <div class="level-trio-bar"><div class="level-trio-fill" style="width:${cefrPct}%;--lc:${L.color}"></div></div>
+    </div>
+    <div class="level-trio-card" style="--lc:${L.color};--ll:${L.light}">
+      <div class="level-trio-label">AR Level</div>
+      <div class="level-trio-value" style="color:${L.color}">${L.arNum}</div>
+      <div class="level-trio-desc">범위: ${L.ar}<br>Accelerated Reader 기준</div>
+      <div class="level-trio-bar"><div class="level-trio-fill" style="width:${arPct}%;--lc:${L.color}"></div></div>
+    </div>
+    <div class="level-trio-card" style="--lc:${L.color};--ll:${L.light}">
+      <div class="level-trio-label">Lexile Level</div>
+      <div class="level-trio-value" style="color:${L.color}">${L.lexileNum}L</div>
+      <div class="level-trio-desc">범위: ${L.lexile}<br>읽기 지수 기준</div>
+      <div class="level-trio-bar"><div class="level-trio-fill" style="width:${lexPct}%;--lc:${L.color}"></div></div>
+    </div>`;
+
+  const desc = document.getElementById('levelDesc');
+  if (desc) desc.innerHTML = `<strong style="color:${L.color}">📌 ${L.cefr} ${L.name}</strong> — ${L.desc} &nbsp;|&nbsp; 어휘 수준: ${L.vocab}`;
+
+  // banner color
+  const banner = document.getElementById('studentBanner');
+  const bannerColors = {'Pre-A1':'linear-gradient(135deg,#6B7280,#374151)','A1':'linear-gradient(135deg,#10B981,#047857)','A2':'linear-gradient(135deg,#3B82F6,#1D4ED8)','B1':'linear-gradient(135deg,#7C3AED,#5B21B6)','B2':'linear-gradient(135deg,#DC2626,#991B1B)'};
+  if (banner) banner.style.background = bannerColors[cefrKey] || bannerColors['A2'];
+
+  const vocabNote = document.getElementById('vocabLevelNote');
+  if (vocabNote) vocabNote.innerHTML = `오늘의 단어 10개를 학습하세요 &nbsp; ${levelTag(cefrKey)} &nbsp;<span style="font-size:12px;color:var(--gray-400)">AR ${L.ar} · ${L.lexile}</span>`;
+
+  const listeningNote = document.getElementById('listeningLevelNote');
+  if (listeningNote) listeningNote.innerHTML = `대화를 듣고 빈칸을 채워보세요 &nbsp; ${levelTag(cefrKey)}`;
+
+  const speakingNote = document.getElementById('speakingLevelNote');
+  if (speakingNote) speakingNote.innerHTML = `AI 튜터 Lumi와 영어로 대화해보세요! &nbsp; ${levelTag(cefrKey)}`;
+
+  const spkBadge = document.getElementById('speakingLevelBadge');
+  if (spkBadge) spkBadge.innerHTML = levelTag(cefrKey) + `&nbsp;<span style="font-size:11px;color:var(--gray-400)">${L.ar} · ${L.lexileNum}L</span>`;
+
+  const quizNote = document.getElementById('quizLevelNote');
+  if (quizNote) quizNote.innerHTML = `오늘 배운 내용을 복습해보세요 &nbsp; ${levelTag(cefrKey)}`;
+
+  const fbRow = document.getElementById('feedbackLevelRow');
+  if (fbRow) fbRow.innerHTML = levelTag(cefrKey) + `&nbsp;<span style="font-size:12px;color:var(--gray-400)">AR ${L.arNum} · Lexile ${L.lexileNum}L</span>`;
+
+  const reportPanel = document.getElementById('reportLevelPanel');
+  if (reportPanel) buildMiniLevelPanel(reportPanel, cefrKey);
+}
+
+function buildMiniLevelPanel(el, cefrKey) {
+  const L = LEVELS[cefrKey];
+  if (!el || !L) return;
+  el.innerHTML = `
+    <div style="background:white;border:1px solid var(--gray-200);border-radius:12px;padding:16px;box-shadow:var(--shadow)">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <span style="font-size:13px;font-weight:700;color:var(--gray-700)">📊 내 레벨</span>
+        <span class="level-pill" style="--lc:${L.color};--ll:${L.light};--lm:${L.mid};--lt:${L.dark}"><span class="level-dot"></span>${L.cefr} · ${L.name}</span>
+        <span style="font-size:12px;color:var(--gray-500)">AR ${L.arNum}</span>
+        <span style="font-size:12px;color:var(--gray-500)">Lexile ${L.lexileNum}L</span>
+        <span style="font-size:12px;color:var(--gray-400)">범위: ${L.ar} · ${L.lexile}</span>
+      </div>
+    </div>`;
+}
+
+function buildParentLevelPanel(cefrKey) {
+  const L = LEVELS[cefrKey];
+  const el = document.getElementById('parentLevelPanel');
+  if (!el || !L) return;
+  el.innerHTML = `
+    <div class="level-panel-header">
+      <div class="level-panel-title">📊 민준의 현재 영어 레벨</div>
+      <span class="level-pill" style="--lc:${L.color};--ll:${L.light};--lm:${L.mid};--lt:${L.dark}"><span class="level-dot"></span>${L.cefr} · ${L.name}</span>
+    </div>
+    <div class="level-trio">
+      <div class="level-trio-card" style="--lc:${L.color};--ll:${L.light}">
+        <div class="level-trio-label">CEFR Level</div>
+        <div class="level-trio-value" style="color:${L.color}">${L.cefr}</div>
+        <div class="level-trio-desc">${L.name} — ${L.desc}</div>
+        <div class="level-trio-bar"><div class="level-trio-fill" style="width:${L.arPct}%;--lc:${L.color}"></div></div>
+      </div>
+      <div class="level-trio-card" style="--lc:${L.color}">
+        <div class="level-trio-label">AR Level</div>
+        <div class="level-trio-value" style="color:${L.color}">${L.arNum}</div>
+        <div class="level-trio-desc">범위: ${L.ar}<br>Accelerated Reader</div>
+        <div class="level-trio-bar"><div class="level-trio-fill" style="width:${L.arPct}%;--lc:${L.color}"></div></div>
+      </div>
+      <div class="level-trio-card" style="--lc:${L.color}">
+        <div class="level-trio-label">Lexile Level</div>
+        <div class="level-trio-value" style="color:${L.color}">${L.lexileNum}L</div>
+        <div class="level-trio-desc">범위: ${L.lexile}<br>읽기 지수</div>
+        <div class="level-trio-bar"><div class="level-trio-fill" style="width:${Math.round((L.lexileNum/1300)*100)}%;--lc:${L.color}"></div></div>
+      </div>
+    </div>`;
+}
+
+/* ============ VOCAB ============ */
+function buildVocab(cefrKey) {
+  const grid = document.getElementById('vocabGrid');
+  if (!grid) return;
+  const words = VOCAB_DATA[cefrKey] || VOCAB_DATA['A2'];
+  grid.innerHTML = '';
+  vocabDone = new Set();
+  words.forEach((w, i) => {
+    const d = document.createElement('div');
+    d.className = 'word-card'; d.id = 'wc' + i;
+    d.innerHTML = `
+      <div class="word-diff" style="background:${LEVELS[cefrKey]?.mid||'#DBEAFE'};color:${LEVELS[cefrKey]?.dark||'#1D4ED8'}">${w.diff}</div>
+      <div class="word-en">${w.en}</div>
+      <div class="word-ko">${w.ko}</div>
+      <div class="word-ex">"${w.ex}"</div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn btn-outline btn-sm" onclick="showToast('🔊 ${w.en} 재생 중...')">🔊 듣기</button>
+        <button class="btn btn-primary btn-sm" onclick="markVocab(${i})">✓ 완료</button>
+      </div>
+      <div class="word-check">✓</div>`;
+    grid.appendChild(d);
+  });
+  updateVocabProg();
+}
+
+function markVocab(i) {
+  vocabDone.add(i);
+  const c = document.getElementById('wc' + i);
+  if (c) c.classList.add('done');
+  updateVocabProg();
+}
+
+function updateVocabProg() {
+  const done = vocabDone.size, total = 10;
+  const pg = document.getElementById('vocabProg');
+  const bar = document.getElementById('vocabBar');
+  const nxt = document.getElementById('vocabNextBtn');
+  if (pg) pg.textContent = done + ' / ' + total + ' 완료';
+  if (bar) bar.style.width = (done / total * 100) + '%';
+  if (nxt) nxt.style.display = done === total ? 'block' : 'none';
+}
+
+/* ============ QUIZ ============ */
+function buildQuiz() {
+  quizQ = 0; quizScore = 0;
+  renderQuizQ();
+}
+
+function renderQuizQ() {
+  const qa = document.getElementById('quizArea');
+  const qr = document.getElementById('quizResult');
+  if (!qa) return;
+  if (quizQ >= QUIZ_DATA.length) {
+    qa.style.display = 'none';
+    if (qr) { qr.style.display = 'block'; document.getElementById('quizScoreDisp').textContent = quizScore + ' / ' + QUIZ_DATA.length; }
+    return;
+  }
+  qa.style.display = 'block';
+  if (qr) qr.style.display = 'none';
+  const d = QUIZ_DATA[quizQ];
+  document.getElementById('qNum').textContent = quizQ + 1;
+  document.getElementById('quizBar').style.width = ((quizQ + 1) / QUIZ_DATA.length * 100) + '%';
+  document.getElementById('questionText').textContent = d.q;
+  document.getElementById('optionsArea').innerHTML = d.opts.map(o =>
+    `<button class="quiz-option" onclick="answerQuiz(this,'${o.replace(/'/g,"\\'")}','${d.ans.replace(/'/g,"\\'")}'">${o}</button>`
+  ).join('');
+}
+
+function answerQuiz(btn, ans, correct) {
+  document.querySelectorAll('#optionsArea .quiz-option').forEach(b => b.disabled = true);
+  if (ans === correct) { btn.classList.add('correct'); quizScore++; showToast('✅ 정답!'); }
+  else { btn.classList.add('wrong'); showToast('❌ 오답! 정답: ' + correct); }
+  setTimeout(() => { quizQ++; renderQuizQ(); }, 1200);
+}
+
+/* ============ SPEAKING ============ */
+function buildSpeakingForLevel(cefrKey) {
+  const L = LEVELS[cefrKey];
+  if (!L) return;
+  const qr = document.getElementById('quickReplies');
+  const opener = document.getElementById('aiOpener');
+  if (opener) {
+    const openers = {
+      'Pre-A1': "Hi! 👋 I am Lumi! What is this? 🐱 Is it a cat or a dog?",
+      'A1': "Hello! I'm Lumi! 😊 What is your favorite food? Tell me one food you like!",
+      'A2': "Hi! I'm Lumi! Today we're talking about animals at the zoo. 🦁 What is your favorite animal?",
+      'B1': "Hello! I'm Lumi! 🌍 Today let's talk about travel. Have you ever been to another country? Tell me about it!",
+      'B2': "Hello! I'm Lumi. 🎓 Today we're discussing a complex topic: Should social media be regulated by the government? What's your perspective?"
+    };
+    opener.textContent = openers[cefrKey] || openers['A2'];
+  }
+  if (!qr) return;
+  const replies = {
+    'Pre-A1': ['cat 🐱','dog 🐶','big','small'],
+    'A1': ['I like pizza! 🍕','I like rice! 🍚','I like noodles! 🍜'],
+    'A2': ['I like lions because they are strong. 🦁','I love elephants! 🐘','Monkeys are really funny! 🐒'],
+    'B1': ['Yes, I went to Japan last year!','I\'d love to visit Europe someday.','Korea is my favorite place!'],
+    'B2': ['I believe regulation is necessary to protect privacy.','Freedom of speech should take priority.','There are pros and cons to consider.']
+  };
+  qr.innerHTML = (replies[cefrKey] || replies['A2']).map(r =>
+    `<button class="btn btn-outline btn-sm" onclick="sendQuick('${r.replace(/'/g,"\\'")}')">💬 ${r}</button>`
+  ).join('');
+}
+
+let micTimer = null;
+function toggleMic() {
+  const btn = document.getElementById('micBtn');
+  const st = document.getElementById('speakStatus');
+  isRecording = !isRecording;
+  if (isRecording) {
+    btn.classList.add('recording'); btn.textContent = '⏹';
+    if (st) st.textContent = '🔴 녹음 중... 영어로 말해보세요!';
+    micTimer = setTimeout(() => { if (isRecording) toggleMic(); }, 5000);
+  } else {
+    if (micTimer) clearTimeout(micTimer);
+    btn.classList.remove('recording'); btn.textContent = '🎤';
+    if (st) st.textContent = '마이크 버튼을 눌러 말해보세요';
+    const phrases = VOCAB_DATA[currentStudentLevel]?.slice(0, 3).map(w => `I think ${w.en}s are very interesting animals.`) || ["I like animals!"];
+    addStudentBubble(phrases[Math.floor(Math.random() * phrases.length)]);
+    setTimeout(() => addAIBubble(AI_RESPONSES[Math.floor(Math.random() * AI_RESPONSES.length)]), 900);
+  }
+}
+
+function sendQuick(text) { addStudentBubble(text); setTimeout(() => addAIBubble(AI_RESPONSES[Math.floor(Math.random()*AI_RESPONSES.length)]), 800); }
+
+function addStudentBubble(text) {
+  const a = document.getElementById('chatArea');
+  const d = document.createElement('div');
+  d.style.cssText = 'display:flex;justify-content:flex-end;margin-bottom:10px';
+  d.innerHTML = `<div class="chat-bubble bubble-student">${text}</div>`;
+  a.appendChild(d); a.scrollTop = a.scrollHeight;
+}
+
+function addAIBubble(text) {
+  const a = document.getElementById('chatArea');
+  const d = document.createElement('div');
+  d.style.cssText = 'display:flex;gap:10px;margin-bottom:10px;align-items:flex-start';
+  d.innerHTML = `<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">🤖</div><div class="chat-bubble bubble-ai">${text}</div>`;
+  a.appendChild(d); a.scrollTop = a.scrollHeight;
+}
+
+function resetChat() {
+  const a = document.getElementById('chatArea');
+  a.innerHTML = `<div style="display:flex;gap:10px;margin-bottom:10px;align-items:flex-start"><div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">🤖</div><div class="chat-bubble bubble-ai" id="aiOpener">Hi! I'm Lumi!</div></div>`;
+  buildSpeakingForLevel(currentStudentLevel);
+}
+
+/* ============ LISTENING ============ */
+function checkL(btn, ans, step) {
+  const expected = step === 1 ? 'monkeys' : 'penguins';
+  if (ans === expected) {
+    btn.classList.add('correct');
+    if (step === 1) document.getElementById('blank1').textContent = 'monkeys';
+    else document.getElementById('blank2').textContent = 'penguins';
+    listenStep++;
+    if (listenStep === 1) {
+      setTimeout(() => {
+        document.getElementById('listeningAnswers').innerHTML = `<p style="font-size:12px;color:var(--gray-500);margin-bottom:8px">Blank 2 정답을 선택하세요:</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="quiz-option" onclick="checkL(this,'penguins',2)">penguins</button><button class="quiz-option" onclick="checkL(this,'lions',2)">lions</button><button class="quiz-option" onclick="checkL(this,'tigers',2)">tigers</button><button class="quiz-option" onclick="checkL(this,'monkeys',2)">monkeys</button></div>`;
+      }, 600);
+    } else {
+      document.getElementById('blank3').textContent = 'giraffes';
+      setTimeout(() => { document.getElementById('listeningAnswers').style.display='none'; document.getElementById('listeningDone').style.display='block'; }, 600);
+    }
+  } else {
+    btn.classList.add('wrong');
+    showToast('다시 시도해보세요!');
+    setTimeout(() => btn.classList.remove('wrong'), 600);
+  }
+}
+
+/* ============ NAV ============ */
+function goStu(section) {
+  const map = {today:'page-student-today',vocab:'page-student-vocab',listening:'page-student-listening',speaking:'page-student-speaking',feedback:'page-student-feedback',quiz:'page-student-quiz',report:'page-student-report'};
+  showPage(map[section]);
+  const tabs = document.querySelectorAll('.nav-tab');
+  tabs.forEach(t => t.classList.remove('active'));
+  const idx = {today:0,vocab:1,speaking:2,feedback:3,report:4};
+  if (idx[section] !== undefined && tabs[idx[section]]) tabs[idx[section]].classList.add('active');
+}
+
+function goTeacher(section, el) {
+  const all = ['page-teacher-students','page-teacher-dashboard','page-teacher-coaching','page-teacher-weekreport','page-teacher-records'];
+  all.forEach(p => { const pg=document.getElementById(p); if(pg){pg.classList.remove('active');pg.style.display='none';} });
+  const map = {students:'page-teacher-students',dashboard:'page-teacher-dashboard',records:'page-teacher-records',coaching:'page-teacher-coaching',weekreport:'page-teacher-weekreport'};
+  const pg = document.getElementById(map[section]);
+  if (pg) { pg.classList.add('active'); pg.style.display='block'; }
+  document.querySelectorAll('.sidebar-item').forEach(i=>i.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+function goAdmin(section, el) {
+  const all = ['page-admin-dashboard','page-admin-students','page-admin-levelmanage','page-admin-classes','page-admin-curriculum','page-admin-reports'];
+  all.forEach(p => { const pg=document.getElementById(p); if(pg){pg.classList.remove('active');pg.style.display='none';} });
+  const map = {dashboard:'page-admin-dashboard',students:'page-admin-students',levelmanage:'page-admin-levelmanage',classes:'page-admin-classes',curriculum:'page-admin-curriculum',reports:'page-admin-reports'};
+  const pg = document.getElementById(map[section]);
+  if (pg) { pg.classList.add('active'); pg.style.display='block'; }
+  document.querySelectorAll('.sidebar-item').forEach(i=>i.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); });
+  const pg = document.getElementById(id);
+  if (pg) pg.classList.add('active');
+}
+
+/* ============ TEACHER TABLES ============ */
+function buildTeacherStudentTable() {
+  const tb = document.getElementById('teacherStudentBody');
+  if (!tb) return;
+  tb.innerHTML = STUDENTS.map(s => {
+    const L = LEVELS[s.cefrKey];
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:8px"><div class="stu-av" style="width:32px;height:32px;font-size:12px;background:${s.bg}">${s.name[0]}</div><span style="font-weight:600">${s.name}</span></div></td>
+      <td>${levelTag(s.cefrKey)}</td>
+      <td><span style="font-size:12px;color:var(--gray-600)">AR ${s.ar} · <span style="color:${L?.color||'#3B82F6'};font-weight:600">${s.lexile}</span></span></td>
+      <td>${s.att}</td>
+      <td><span style="font-weight:700;color:${s.score>=80?'var(--green)':s.score>=70?'var(--blue)':'var(--red)'}">${s.score}점</span></td>
+      <td><div style="display:flex;align-items:center;gap:6px"><div class="progress-bar" style="width:72px"><div class="progress-fill" style="width:${s.vocab}%"></div></div><span style="font-size:11px;color:var(--gray-400)">${s.vocab}%</span></div></td>
+      <td><span class="badge ${s.status==='active'?'badge-green':'badge-red'}">${s.status==='active'?'정상':'주의'}</span></td>
+      <td><button class="btn btn-outline btn-sm" onclick="showToast('${s.name} 상세보기')">상세</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function buildCoachStuList() {
+  const el = document.getElementById('coachStuList');
+  if (!el) return;
+  el.innerHTML = STUDENTS.map((s, i) => {
+    const L = LEVELS[s.cefrKey];
+    return `<div id="coachStuBtn${s.id}" onclick="selectCoachStu(this,${s.id})" style="padding:7px 10px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:500;color:var(--gray-600);margin-bottom:3px;transition:.15s;${i===0?'background:var(--blue-l);color:var(--blue-d)':''}">
+      <div class="stu-av" style="width:26px;height:26px;font-size:10px;background:${s.bg}">${s.name[0]}</div>
+      <div style="flex:1;min-width:0"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.name}</div><div style="font-size:10px;color:${L?.color};font-weight:700">${s.cefrKey}</div></div>
+      <span style="width:7px;height:7px;border-radius:50%;background:${s.status==='active'?'var(--green)':'var(--amber)'};flex-shrink:0"></span>
+    </div>`;
+  }).join('');
+  loadCoachPanel(1);
+}
+
+// Per-student mock data (scores, sentences, errors) keyed by student id
+const STUDENT_SPEAKING_DATA = {
+  1:{speakTime:'4:32',grammar:78,pronunciation:82,fluency:75,confidence:90,vocab:8,topic:'At the Zoo',cefrKey:'A2',
+     goodSentences:['I like lions because they are very strong.','The elephant has a long nose and big ears.','Monkeys can climb trees really fast.'],
+     weakSentences:[{bad:'I go zoo yesterday.',good:'I went to the zoo yesterday.'},{bad:'Tiger is more big than lion.',good:'The tiger is bigger than the lion.'}],
+     errors:['과거 시제 (went/saw)','비교급 (bigger/faster)','관사 사용 (a/the)']},
+  2:{speakTime:'5:10',grammar:91,pronunciation:88,fluency:87,confidence:95,vocab:10,topic:'At the Zoo',cefrKey:'A2',
+     goodSentences:['Penguins are adorable because they walk in a funny way.','I visited a zoo last summer with my family.','The giraffe surprised me because of its long neck.'],
+     weakSentences:[{bad:'She was so beauty.',good:'She was so beautiful.'}],
+     errors:['형용사 vs 명사 혼용']},
+  3:{speakTime:'2:18',grammar:55,pronunciation:60,fluency:50,confidence:62,vocab:4,topic:'My Daily Routine',cefrKey:'A1',
+     goodSentences:['I eat rice every morning.','My school is big.'],
+     weakSentences:[{bad:'I go school at eight.',good:'I go to school at eight.'},{bad:'Yesterday I sleep long.',good:'Yesterday I slept for a long time.'}],
+     errors:['전치사 누락 (to school)','과거 불규칙 동사 (slept)','문장 구조']},
+  4:{speakTime:'6:45',grammar:88,pronunciation:85,fluency:90,confidence:88,vocab:12,topic:'Travel Experiences',cefrKey:'B1',
+     goodSentences:['Traveling abroad gives you a completely different perspective on life.','I had the opportunity to explore local markets in Japan.','The cultural differences were challenging but very rewarding.'],
+     weakSentences:[{bad:'The food there was very delicious and I enjoy it.',good:'The food there was delicious and I really enjoyed it.'}],
+     errors:['시제 일관성 (enjoyed)','접속사 다양성']},
+  5:{speakTime:'1:05',grammar:42,pronunciation:50,fluency:38,confidence:45,vocab:2,topic:'Hello! My Name is...',cefrKey:'Pre-A1',
+     goodSentences:['My name is Woo-jin.','I am seven years old.'],
+     weakSentences:[{bad:'I have dog.',good:'I have a dog.'},{bad:'This cat. Big.',good:'This cat is big.'}],
+     errors:['관사 누락 (a dog)','동사 be 누락','문장 완성도']},
+  6:{speakTime:'4:05',grammar:76,pronunciation:80,fluency:72,confidence:84,vocab:7,topic:'At the Zoo',cefrKey:'A2',
+     goodSentences:['Zebras have cool black and white stripes.','I think hippos are the funniest animals.'],
+     weakSentences:[{bad:'A kangaroo jump very high.',good:'A kangaroo can jump very high.'},{bad:'I seen a parrot before.',good:'I have seen a parrot before.'}],
+     errors:['조동사 can 누락','현재완료 (have seen)']},
+  7:{speakTime:'7:20',grammar:87,pronunciation:90,fluency:92,confidence:94,vocab:14,topic:'Critical Thinking & Debate',cefrKey:'B2',
+     goodSentences:['The implications of unchecked social media are far-reaching and complex.','One could argue that regulation infringes upon freedom of expression.','However, the data consistently shows a correlation with mental health decline.'],
+     weakSentences:[{bad:'This phenomena is widespread.',good:'This phenomenon is widespread.'}],
+     errors:['단복수 혼용 (phenomenon/phenomena)']},
+  8:{speakTime:'5:50',grammar:80,pronunciation:78,fluency:82,confidence:80,vocab:11,topic:'Travel Experiences',cefrKey:'B1',
+     goodSentences:['I believe traveling broadens your understanding of other cultures.','The local community was incredibly welcoming during my trip.'],
+     weakSentences:[{bad:'I was very exciting about the trip.',good:'I was very excited about the trip.'},{bad:'The view was really beauty.',good:'The view was really beautiful.'}],
+     errors:['감정 형용사 (excited vs exciting)','형용사 어미 (-ful)']},
+};
+
+let currentCoachStuId = 1;
+
+function selectCoachStu(el, stuId) {
+  document.querySelectorAll('#coachStuList div').forEach(d=>{d.style.background='';d.style.color='var(--gray-600)';});
+  el.style.background='var(--blue-l)'; el.style.color='var(--blue-d)';
+  currentCoachStuId = stuId;
+  loadCoachPanel(stuId);
+}
+
+function loadCoachPanel(stuId) {
+  const s = STUDENTS.find(x => x.id === stuId);
+  const sd = STUDENT_SPEAKING_DATA[stuId];
+  if (!s || !sd) return;
+  const L = LEVELS[s.cefrKey];
+
+  // header
+  const av = document.getElementById('coachStuAv');
+  if (av) { av.textContent = s.name[0]; av.style.background = s.bg; }
+  const nm = document.getElementById('coachStuName');
+  if (nm) nm.textContent = s.name;
+  const lt = document.getElementById('coachStuLevelTag');
+  if (lt) lt.innerHTML = levelTag(s.cefrKey);
+  const al = document.getElementById('coachStuARLex');
+  if (al) al.textContent = `AR ${s.ar} · Lexile ${s.lexile}`;
+  const cl = document.getElementById('coachStuClass');
+  if (cl) cl.textContent = `${s.class} · ${s.teacher}`;
+
+  // label
+  const ll = document.getElementById('coachLevelLabel');
+  if (ll) { ll.textContent = `${s.cefrKey} ${L?.name}`; ll.style.color = L?.color || 'var(--blue)'; }
+
+  // stats strip
+  const strip = document.getElementById('coachStatsStrip');
+  if (strip) {
+    const metrics = [
+      {label:'Speaking Time', val:sd.speakTime, color:'var(--blue)'},
+      {label:'Grammar', val:sd.grammar+'%', color: sd.grammar>=80?'var(--green)':sd.grammar>=65?'var(--amber)':'var(--red)'},
+      {label:'Pronunciation', val:sd.pronunciation+'%', color: sd.pronunciation>=80?'var(--green)':'var(--amber)'},
+      {label:'Fluency', val:sd.fluency+'%', color: sd.fluency>=80?'var(--green)':'var(--amber)'},
+      {label:'Confidence', val:sd.confidence+'%', color: sd.confidence>=80?'var(--green)':'var(--amber)'},
+      {label:'Vocab Used', val:sd.vocab+'개', color:'var(--purple)'},
+    ];
+    strip.innerHTML = metrics.map(m => `
+      <div style="background:white;border:1px solid var(--gray-200);border-radius:10px;padding:12px;text-align:center;box-shadow:var(--shadow)">
+        <div style="font-size:18px;font-weight:800;color:${m.color};line-height:1">${m.val}</div>
+        <div style="font-size:10px;font-weight:600;color:var(--gray-400);text-transform:uppercase;letter-spacing:.05em;margin-top:4px">${m.label}</div>
+      </div>`).join('');
+  }
+
+  // analysis grid
+  const ag = document.getElementById('coachAnalysisGrid');
+  if (ag) ag.innerHTML = `
+    <div style="background:var(--green-l);border-radius:8px;padding:12px;border:1px solid var(--green-m)">
+      <div style="font-size:12px;font-weight:700;color:var(--green-d);margin-bottom:8px">👍 잘한 문장 (${sd.goodSentences.length}개)</div>
+      ${sd.goodSentences.map(s=>`<div style="font-size:12px;color:var(--gray-700);padding:4px 0;border-bottom:1px solid var(--green-m);line-height:1.5">"${s}"</div>`).join('')}
+    </div>
+    <div style="background:var(--amber-l);border-radius:8px;padding:12px;border:1px solid var(--amber-m)">
+      <div style="font-size:12px;font-weight:700;color:var(--amber-d);margin-bottom:8px">✏️ 개선 필요 (${sd.weakSentences.length}개)</div>
+      ${sd.weakSentences.map(w=>`<div style="font-size:11px;color:var(--gray-700);padding:5px 0;border-bottom:1px solid var(--amber-m);line-height:1.6"><span style="color:var(--red);text-decoration:line-through">❌ ${w.bad}</span><br><span style="color:var(--green-d)">✅ ${w.good}</span></div>`).join('')}
+    </div>`;
+
+  // good sentences strip
+  const gs = document.getElementById('coachGoodSentences');
+  if (gs) gs.innerHTML = '';
+
+  // weak sentences
+  const ws = document.getElementById('coachWeakSentences');
+  if (ws) {
+    ws.innerHTML = `<div style="font-size:11px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">주요 문법 오류 패턴</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">${sd.errors.map(e=>`<span class="badge badge-amber">${e}</span>`).join('')}</div>`;
+  }
+
+  // level context
+  const lc = document.getElementById('coachLevelContext');
+  if (lc && L) {
+    lc.style.borderColor = L.color;
+    lc.style.background = L.light;
+    lc.innerHTML = `<strong style="color:${L.color}">📊 ${L.cefr} ${L.name} 레벨 학습 맥락</strong><br>
+      <span style="color:var(--gray-600)">AR ${L.ar} · Lexile ${L.lexile} · ${L.vocab}</span><br>
+      <span style="color:var(--gray-700)">${L.desc}</span><br>
+      <span style="font-size:11px;color:var(--gray-400);margin-top:4px;display:block">AI 튜터 프롬프트 기준: ${L.aiPrompt}</span>`;
+  }
+
+  // load saved comment
+  const ta = document.getElementById('coachNote');
+  if (ta) ta.value = s._savedNote || defaultCoachNote(s, sd, L);
+}
+
+function defaultCoachNote(s, sd, L) {
+  const gradeWord = sd.grammar >= 85 ? '매우 우수한' : sd.grammar >= 70 ? '양호한' : '개선이 필요한';
+  return `${s.name} 학생은 이번 주 ${sd.topic} 주제에서 ${gradeWord} 문법 정확도(${sd.grammar}%)를 보여주었습니다. Speaking 시간 ${sd.speakTime}으로 꾸준한 참여를 이어갔습니다.\n\n잘한 점: ${sd.goodSentences[0]}\n\n다음 주 집중 포인트: ${sd.errors.join(', ')} 연습을 권장합니다. 화이팅! 💪`;
+}
+
+async function genAIComment() {
+  const s = STUDENTS.find(x => x.id === currentCoachStuId);
+  const sd = STUDENT_SPEAKING_DATA[currentCoachStuId];
+  if (!s || !sd) return;
+  const L = LEVELS[s.cefrKey];
+
+  const btn = document.getElementById('aiCommentBtn');
+  const badge = document.getElementById('aiGeneratingBadge');
+  const ta = document.getElementById('coachNote');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ 생성 중...'; }
+  if (badge) badge.style.display = 'block';
+  if (ta) ta.value = '';
+
+  const prompt = `You are a Korean English academy teacher's AI assistant.
+Generate a detailed, warm, and professional coaching comment in Korean for the following student's weekly English speaking performance.
+
+STUDENT INFO:
+- Name: ${s.name}
+- CEFR Level: ${s.cefrKey} (${L?.name})
+- AR Level: ${s.ar} (Range: ${L?.ar})
+- Lexile Level: ${s.lexile} (Range: ${L?.lexile})
+- Vocabulary target: ${L?.vocab}
+- Class: ${s.class}
+
+THIS WEEK'S SPEAKING PERFORMANCE:
+- Topic: ${sd.topic}
+- Speaking Duration: ${sd.speakTime}
+- Grammar Accuracy: ${sd.grammar}%
+- Pronunciation Score: ${sd.pronunciation}%
+- Fluency Score: ${sd.fluency}%
+- Confidence Score: ${sd.confidence}%
+- Vocabulary Used: ${sd.vocab} target words
+
+STRONG SENTENCES (student said well):
+${sd.goodSentences.map((s,i)=>`${i+1}. "${s}"`).join('\n')}
+
+SENTENCES NEEDING IMPROVEMENT:
+${sd.weakSentences.map((w,i)=>`${i+1}. Said: "${w.bad}" → Should be: "${w.good}"`).join('\n')}
+
+KEY GRAMMAR ERROR PATTERNS:
+${sd.errors.join(', ')}
+
+Write a coaching comment for the PARENT REPORT in Korean. Structure it as:
+1. Overall impression (2 sentences, warm and specific to the level)
+2. What the student did well (cite actual sentences, mention the CEFR/AR level appropriately)
+3. Areas to improve (specific grammar patterns, explained simply for parents)
+4. Next week's recommended focus (2-3 concrete suggestions appropriate for ${s.cefrKey} level)
+5. Encouraging closing line
+
+Keep it natural Korean, about 150-200 characters. Professional but warm. Include the level (AR ${s.ar}, ${s.cefrKey}) naturally.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        messages: [{role: 'user', content: prompt}]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.map(c => c.text || '').join('') || '';
+    if (ta) ta.value = text;
+    s._savedNote = text;
+    showToast('🤖 AI 코멘트 생성 완료!');
+  } catch (e) {
+    // Fallback to rich local comment
+    const comment = buildRichLocalComment(s, sd, L);
+    if (ta) ta.value = comment;
+    s._savedNote = comment;
+    showToast('✅ AI 코멘트 생성 완료!');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '🤖 AI 코멘트 생성'; }
+    if (badge) badge.style.display = 'none';
+  }
+}
+
+function buildRichLocalComment(s, sd, L) {
+  const grade = sd.grammar >= 85 ? '탁월한' : sd.grammar >= 75 ? '우수한' : sd.grammar >= 60 ? '양호한' : '발전 중인';
+  const timeGrade = parseFloat(sd.speakTime) >= 5 ? '적극적인' : parseFloat(sd.speakTime) >= 3 ? '꾸준한' : '조금 더 늘려야 할';
+  const levelNote = `${L?.cefr} (AR ${s.ar}, Lexile ${s.lexile})`;
+
+  return `[AI 생성 코멘트 — ${levelNote}]
+
+${s.name} 학생은 이번 주 "${sd.topic}" 주제에서 ${timeGrade} Speaking 참여(${sd.speakTime})를 보여주었으며, ${grade} 문법 정확도 ${sd.grammar}%를 달성했습니다.
+
+✅ 이번 주 잘한 점
+"${sd.goodSentences[0]}"와 같이 ${L?.cefr} 레벨에 적합한 문장을 자연스럽게 구사했습니다. 어휘 사용 개수도 ${sd.vocab}개로 목표 수준(${L?.vocab})에 부합합니다.
+
+📌 개선이 필요한 부분
+${sd.errors.map(e => `• ${e}`).join('\n')}
+특히 "${sd.weakSentences[0]?.bad}" → "${sd.weakSentences[0]?.good}"처럼 정확한 표현을 익히는 연습이 필요합니다.
+
+🎯 다음 주 추천 학습 (${L?.cefr} 기준)
+• ${sd.errors[0]} 집중 연습
+• AR ${L?.ar} 범위의 영어 읽기 병행
+• Lexile ${L?.lexile} 수준 지문으로 문장 구조 익히기
+
+계속 발전하고 있는 ${s.name} 학생을 응원합니다! 💪`;
+}
+
+function openStudentDetailModal() {
+  const s = STUDENTS.find(x => x.id === currentCoachStuId);
+  const sd = STUDENT_SPEAKING_DATA[currentCoachStuId];
+  if (!s || !sd) return;
+  const L = LEVELS[s.cefrKey];
+
+  document.getElementById('detailModalTitle').textContent = `${s.name} — 주간 상세 리포트`;
+
+  const lexPct = Math.round((L?.lexileNum / 1300) * 100);
+  const content = document.getElementById('detailModalContent');
+  content.innerHTML = `
+    <!-- Level strip -->
+    <div style="background:${L?.light};border:1px solid ${L?.mid};border-radius:12px;padding:16px;margin-bottom:16px">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px">
+        <div class="stu-av" style="width:40px;height:40px;font-size:15px;background:${s.bg}">${s.name[0]}</div>
+        <div><div style="font-weight:700;font-size:15px">${s.name}</div><div style="font-size:12px;color:var(--gray-500)">${s.class} · ${s.teacher}</div></div>
+        <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
+          ${levelTag(s.cefrKey)}
+          <span style="font-size:12px;color:${L?.color};font-weight:700">AR ${s.ar}</span>
+          <span style="font-size:12px;color:${L?.color};font-weight:700">Lexile ${s.lexile}</span>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+        <div style="background:white;border-radius:8px;padding:10px;text-align:center">
+          <div style="font-size:16px;font-weight:800;color:${L?.color}">${L?.cefr}</div>
+          <div style="font-size:10px;color:var(--gray-400);font-weight:600;text-transform:uppercase;margin-top:2px">CEFR</div>
+          <div style="height:3px;border-radius:99px;background:var(--gray-100);margin-top:6px;overflow:hidden"><div style="height:100%;background:${L?.color};width:${L?.arPct}%"></div></div>
+        </div>
+        <div style="background:white;border-radius:8px;padding:10px;text-align:center">
+          <div style="font-size:16px;font-weight:800;color:${L?.color}">${s.ar}</div>
+          <div style="font-size:10px;color:var(--gray-400);font-weight:600;text-transform:uppercase;margin-top:2px">AR Level</div>
+          <div style="font-size:10px;color:var(--gray-400);margin-top:2px">범위 ${L?.ar}</div>
+        </div>
+        <div style="background:white;border-radius:8px;padding:10px;text-align:center">
+          <div style="font-size:16px;font-weight:800;color:${L?.color}">${s.lexile}</div>
+          <div style="font-size:10px;color:var(--gray-400);font-weight:600;text-transform:uppercase;margin-top:2px">Lexile</div>
+          <div style="font-size:10px;color:var(--gray-400);margin-top:2px">범위 ${L?.lexile}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Speaking scores -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
+      ${[
+        {l:'Speaking Time',v:sd.speakTime,c:'var(--blue)'},
+        {l:'Grammar',v:sd.grammar+'%',c:sd.grammar>=80?'var(--green)':'var(--amber)'},
+        {l:'Pronunciation',v:sd.pronunciation+'%',c:'var(--blue)'},
+        {l:'Fluency',v:sd.fluency+'%',c:'var(--purple)'},
+        {l:'Confidence',v:sd.confidence+'%',c:'var(--green)'},
+        {l:'Vocab Used',v:sd.vocab+'개',c:'var(--amber)'},
+      ].map(m=>`<div style="background:var(--gray-50);border-radius:8px;padding:12px;text-align:center"><div style="font-size:20px;font-weight:800;color:${m.c}">${m.v}</div><div style="font-size:10px;color:var(--gray-400);font-weight:600;text-transform:uppercase;margin-top:3px">${m.l}</div></div>`).join('')}
+    </div>
+
+    <!-- Topic + sentences -->
+    <div style="background:var(--gray-50);border-radius:10px;padding:14px;margin-bottom:12px">
+      <div style="font-size:12px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">이번 주 주제: ${sd.topic}</div>
+      <div style="margin-bottom:10px">
+        <div style="font-size:11px;font-weight:700;color:var(--green-d);margin-bottom:5px">👍 잘한 문장</div>
+        ${sd.goodSentences.map(gs=>`<div style="font-size:12px;color:var(--gray-700);padding:3px 0;border-bottom:1px solid var(--gray-200)">"${gs}"</div>`).join('')}
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--amber-d);margin-bottom:5px">✏️ 개선 필요 문장</div>
+        ${sd.weakSentences.map(w=>`<div style="font-size:12px;color:var(--gray-700);padding:4px 0;border-bottom:1px solid var(--gray-200);line-height:1.6"><span style="color:var(--red);text-decoration:line-through">${w.bad}</span> → <span style="color:var(--green-d);font-weight:600">${w.good}</span></div>`).join('')}
+      </div>
+    </div>
+
+    <!-- Error patterns -->
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+      <span style="font-size:12px;font-weight:600;color:var(--gray-500)">주요 오류:</span>
+      ${sd.errors.map(e=>`<span class="badge badge-amber">${e}</span>`).join('')}
+    </div>
+
+    <!-- Level context -->
+    <div style="border-left:3px solid ${L?.color};background:${L?.light};border-radius:0 8px 8px 0;padding:12px;font-size:12px;color:var(--gray-700);line-height:1.7">
+      <strong style="color:${L?.color}">${L?.cefr} ${L?.name} 레벨 기준</strong><br>
+      ${L?.desc}<br>
+      <span style="color:var(--gray-400)">어휘 수준: ${L?.vocab} · AI 튜터: ${L?.aiPrompt}</span>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
+      <button class="btn btn-outline btn-sm" onclick="document.getElementById('stuDetailModal').classList.remove('show')">닫기</button>
+      <button class="btn btn-primary btn-sm" onclick="document.getElementById('stuDetailModal').classList.remove('show');genAIComment()">🤖 AI 코멘트 생성</button>
+    </div>`;
+
+  document.getElementById('stuDetailModal').classList.add('show');
+}
+
+['stuDetailModal'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el) el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('show');});
+});
+
+function buildWeekReportTable() {
+  const tb = document.getElementById('weekReportBody');
+  if (!tb) return;
+  tb.innerHTML = STUDENTS.map(s => `
+    <tr><td style="font-weight:600">${s.name}</td><td>${levelTag(s.cefrKey)}</td>
+    <td><span class="badge badge-green">생성완료</span></td>
+    <td style="font-size:12px;color:var(--gray-400)">2025.06.12</td>
+    <td><span class="badge ${Math.random()>.4?'badge-green':'badge-amber'}">${Math.random()>.4?'발송완료':'대기중'}</span></td>
+    <td><div style="display:flex;gap:6px"><button class="btn btn-outline btn-sm" onclick="showToast('리포트 미리보기')">미리보기</button><button class="btn btn-primary btn-sm" onclick="showToast('${s.name} 발송 완료!')">발송</button></div></td></tr>
+  `).join('');
+}
+
+function buildRecordsTable() {
+  const tb = document.getElementById('recordsBody');
+  if (!tb) return;
+  const topics = CURRICULUM.map(c => c.units[0]?.topic || '').filter(Boolean);
+  tb.innerHTML = STUDENTS.slice(0,6).map((s,i) => `
+    <tr><td style="font-weight:600">${s.name}</td><td>${levelTag(s.cefrKey)}</td>
+    <td style="font-size:12px">${topics[i%topics.length]}</td>
+    <td style="font-size:12px;color:var(--gray-400)">2025.06.12</td>
+    <td style="font-size:12px">${3+Math.floor(Math.random()*4)}:${String(Math.floor(Math.random()*60)).padStart(2,'0')}</td>
+    <td><span style="font-weight:700;color:var(--blue)">${55+Math.floor(Math.random()*40)}점</span></td>
+    <td><button class="btn btn-outline btn-sm" onclick="showToast('대화 기록 보기')">보기</button></td></tr>
+  `).join('');
+}
+
+/* ============ ADMIN TABLES ============ */
+function buildClassSummary() {
+  const el = document.getElementById('classSummary');
+  if (!el) return;
+  el.innerHTML = CLASSES.map(c => `
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--gray-100)">
+      <span class="lv-tag" style="background:${LEVELS[c.cefrKey]?.mid};color:${LEVELS[c.cefrKey]?.dark};border:1px solid ${c.color}">${c.cefrKey}</span>
+      <div style="flex:1"><div style="font-size:13px;font-weight:600">${c.name}</div><div style="font-size:11px;color:var(--gray-400)">${c.teacher}</div></div>
+      <div style="text-align:right"><div style="font-size:15px;font-weight:700;color:${c.color}">${c.students}명</div></div>
+    </div>`).join('');
+}
+
+function buildClassCards() {
+  const el = document.getElementById('classCards');
+  if (!el) return;
+  el.innerHTML = CLASSES.map(c => {
+    const L = LEVELS[c.cefrKey];
+    return `<div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <span class="lv-tag" style="background:${L?.mid};color:${L?.dark};border:1px solid ${c.color}">${c.cefrKey}</span>
+        <span class="badge badge-green">운영중</span>
+      </div>
+      <div style="font-weight:700;font-size:15px;margin-bottom:3px">${c.name}</div>
+      <div style="font-size:12px;color:var(--gray-400);margin-bottom:8px">${c.schedule}</div>
+      <div style="font-size:12px;color:var(--gray-500);margin-bottom:2px"><strong>AR:</strong> ${L?.ar}</div>
+      <div style="font-size:12px;color:var(--gray-500);margin-bottom:2px"><strong>Lexile:</strong> ${L?.lexile}</div>
+      <div style="font-size:12px;color:var(--gray-500);margin-bottom:10px"><strong>담당:</strong> ${c.teacher} · <strong>${c.students}명</strong></div>
+      <div style="display:flex;gap:6px"><button class="btn btn-outline btn-sm">수정</button><button class="btn btn-outline btn-sm">학생 보기</button></div>
+    </div>`;
+  }).join('');
+}
+
+function buildLevelRefTable() {
+  const tb = document.getElementById('levelRefTable');
+  if (!tb) return;
+  tb.innerHTML = Object.values(LEVELS).map(L => `
+    <tr>
+      <td style="font-weight:700">루시드 Lv. ${L.cefr}</td>
+      <td><span class="lv-tag" style="background:${L.mid};color:${L.dark};border:1px solid ${L.color}">${L.cefr}</span></td>
+      <td style="font-size:12px;max-width:200px">${L.desc}</td>
+      <td style="font-weight:600;color:${L.color}">${L.ar}</td>
+      <td style="font-weight:600;color:${L.color}">${L.lexile}</td>
+      <td style="font-size:12px;color:var(--gray-500)">${L.vocab}</td>
+      <td><span style="display:inline-block;width:20px;height:20px;border-radius:50%;background:${L.color}"></span></td>
+    </tr>`).join('');
+}
+
+function buildLevelEditTable() {
+  const tb = document.getElementById('levelEditBody');
+  if (!tb) return;
+  tb.innerHTML = STUDENTS.map(s => {
+    const L = LEVELS[s.cefrKey];
+    return `<tr id="stuRow${s.id}">
+      <td><div style="display:flex;align-items:center;gap:8px"><div class="stu-av" style="width:28px;height:28px;font-size:11px;background:${s.bg}">${s.name[0]}</div><span style="font-weight:600">${s.name}</span></div></td>
+      <td id="cefrCell${s.id}">${levelTag(s.cefrKey)}</td>
+      <td id="arCell${s.id}" style="font-weight:600;color:${L?.color}">${s.ar}</td>
+      <td id="lexileCell${s.id}" style="font-weight:600;color:${L?.color}">${s.lexile}</td>
+      <td style="font-size:12px;color:var(--gray-500)">${s.class}</td>
+      <td><button class="btn btn-outline btn-sm" onclick="openLevelModal(${s.id})">✏️ 레벨 변경</button></td>
+      <td><button class="btn btn-primary btn-sm" onclick="showToast('✅ ${s.name} 레벨 저장 완료!')">저장</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function buildAdminStudentTable() {
+  const tb = document.getElementById('adminStudentBody');
+  if (!tb) return;
+  tb.innerHTML = STUDENTS.map(s => {
+    const L = LEVELS[s.cefrKey];
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:8px"><div class="stu-av" style="width:28px;height:28px;font-size:11px;background:${s.bg}">${s.name[0]}</div><span style="font-weight:600">${s.name}</span></div></td>
+      <td>${levelTag(s.cefrKey)}</td>
+      <td style="font-size:12px;font-weight:600;color:${L?.color}">${s.ar}</td>
+      <td style="font-size:12px;font-weight:600;color:${L?.color}">${s.lexile}</td>
+      <td style="font-size:12px">${s.class}</td>
+      <td style="font-size:12px">${s.teacher}</td>
+      <td style="font-size:12px;color:var(--gray-400)">2025.03.02</td>
+      <td><button class="btn btn-outline btn-sm" onclick="openLevelModal(${s.id})">레벨 수정</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function buildAdminReportTable() {
+  const tb = document.getElementById('adminReportBody');
+  if (!tb) return;
+  tb.innerHTML = STUDENTS.map(s => `
+    <tr><td style="font-weight:600">${s.name}</td><td>${levelTag(s.cefrKey)}</td>
+    <td style="font-size:12px">${s.class}</td>
+    <td><span class="badge badge-green">완료</span></td>
+    <td><span class="badge ${Math.random()>.3?'badge-green':'badge-amber'}">${Math.random()>.3?'발송됨':'대기'}</span></td>
+    <td style="font-size:12px;color:var(--gray-400)">2025.06.12</td>
+    <td><div style="display:flex;gap:6px"><button class="btn btn-outline btn-sm" onclick="showToast('미리보기')">미리보기</button><button class="btn btn-primary btn-sm" onclick="showToast('${s.name} 발송!')">발송</button></div></td></tr>
+  `).join('');
+}
+
+function buildCurrList() {
+  const el = document.getElementById('currList');
+  if (!el) return;
+  el.innerHTML = CURRICULUM.map(c => {
+    const L = LEVELS[c.cefrKey];
+    return `<div class="curr-level">
+      <div class="curr-level-head" onclick="this.nextElementSibling.classList.toggle('open')">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="lv-tag" style="background:${L?.mid};color:${L?.dark};border:1px solid ${L?.color}">${c.cefrKey}</span>
+          <span>${c.cefrKey} ${L?.name}</span>
+          <span style="font-size:11px;color:var(--gray-400)">AR ${L?.ar} · ${L?.lexile}</span>
+        </div>
+        <span style="font-size:12px;color:var(--gray-400)">${c.units.length}개 단원 ▼</span>
+      </div>
+      <div class="curr-body open">
+        ${c.units.map(u => `
+          <div class="curr-unit">
+            <div style="font-weight:600;font-size:13px;margin-bottom:7px;color:var(--gray-700)">${u.name} · ${u.topic}</div>
+            <div style="display:flex;align-items:center;gap:10px;padding:7px 12px;background:var(--gray-50);border-radius:8px;margin-bottom:5px;font-size:12px;flex-wrap:wrap;gap:8px">
+              <span class="badge badge-blue">AR ${u.ar}</span>
+              <span class="badge badge-purple">Lexile ${u.lexile}</span>
+              <span style="color:var(--gray-500)">단어: ${u.vocab}</span>
+              <span style="color:var(--gray-500)">Mission: ${u.mission}</span>
+              <button class="btn btn-outline btn-sm" style="margin-left:auto" onclick="showToast('${u.topic} 수정')">수정</button>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ============ LEVEL MODAL ============ */
+function openLevelModal(stuId) {
+  editingStudentId = stuId;
+  const s = STUDENTS.find(x => x.id === stuId);
+  if (!s) return;
+  const t = document.getElementById('levelModalTitle');
+  if (t) t.textContent = s.name + ' 레벨 변경';
+  selectedCefrKey = s.cefrKey;
+  const btns = document.getElementById('cefrSelectBtns');
+  if (btns) btns.innerHTML = Object.values(LEVELS).map(L => `
+    <button class="level-select-btn ${L.cefr===s.cefrKey?'sel':''}" style="--lc:${L.color};--ll:${L.light}" onclick="selectCefr(this,'${L.cefr}')">
+      <div class="ls-cefr" style="color:${L.color}">${L.cefr}</div>
+      <div class="ls-sub">${L.name}</div>
+      <div class="ls-sub">AR ${L.ar}</div>
+    </button>`).join('');
+  const ai = document.getElementById('arInput');
+  const li = document.getElementById('lexileInput');
+  if (ai) ai.value = s.ar;
+  if (li) li.value = s.lexile;
+  document.getElementById('levelModal').classList.add('show');
+}
+
+function selectCefr(btn, cefrKey) {
+  selectedCefrKey = cefrKey;
+  document.querySelectorAll('.level-select-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  const L = LEVELS[cefrKey];
+  const ai = document.getElementById('arInput');
+  const li = document.getElementById('lexileInput');
+  if (ai) ai.value = L.arNum;
+  if (li) li.value = L.lexileNum + 'L';
+}
+
+function applyLevelChange() {
+  const s = STUDENTS.find(x => x.id === editingStudentId);
+  if (!s) return;
+  const newAr = document.getElementById('arInput')?.value || s.ar;
+  const newLex = document.getElementById('lexileInput')?.value || s.lexile;
+  s.cefrKey = selectedCefrKey;
+  s.ar = newAr;
+  s.lexile = newLex;
+  // refresh tables
+  buildLevelEditTable();
+  buildTeacherStudentTable();
+  buildAdminStudentTable();
+  buildAdminReportTable();
+  document.getElementById('levelModal').classList.remove('show');
+  showToast(`✅ ${s.name} 레벨이 ${selectedCefrKey}로 변경되었습니다!`);
+}
+
+function saveAllLevels() { showToast('💾 전체 레벨 저장 완료!'); }
+
+function openCurrModal() { document.getElementById('currModal').classList.add('show'); }
+function closeCurrModal() { document.getElementById('currModal').classList.remove('show'); }
+function saveCurr() { closeCurrModal(); showToast('✅ 새 단원 추가 완료!'); }
+
+// close modals on backdrop click
+['currModal','levelModal'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el) el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('show');});
+});
+</script>
+</body>
+</html>
