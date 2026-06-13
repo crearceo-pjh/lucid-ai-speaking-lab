@@ -320,7 +320,7 @@ body{font-family:'Inter',sans-serif;background:var(--gray-50);color:var(--gray-8
 <div id="page-student-today" class="page">
 <div class="container">
   <div class="welcome-banner" id="studentBanner" style="background:linear-gradient(135deg,var(--blue),var(--purple))">
-    <h2 id="bannerGreet">안녕하세요, 민준! 👋</h2>
+    <h2 id="bannerGreet">안녕하세요! 👋</h2>
     <p>오늘도 열심히 영어 공부해봐요!</p>
     <div class="welcome-meta">
       <div class="welcome-meta-item" id="bannerUnit">📚 Level A2 · Unit 3 / Week 2</div>
@@ -1417,6 +1417,8 @@ function setupRole(role, userName) {
   if (role === 'student') {
     av.style.background = '#DBEAFE'; av.style.color = '#1D4ED8'; av.textContent = (userName||'학생')[0];
     un.textContent = userName || '학생';
+    const greet = document.getElementById('bannerGreet');
+    if (greet) greet.textContent = `안녕하세요, ${userName}! 👋`;
     const tabs = [['today','오늘의 학습'],['vocab','단어 예습'],['speaking','AI Speaking'],['feedback','분석결과'],['report','내 리포트']];
     tabs.forEach(([k,l]) => {
       const b = document.createElement('button'); b.className = 'nav-tab'; b.textContent = l;
