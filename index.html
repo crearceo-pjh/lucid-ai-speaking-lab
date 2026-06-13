@@ -1,4 +1,4 @@
-<!DOCTYPE html>file:///C:/Users/CRA/Desktop/index.html
+<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -275,23 +275,28 @@ body{font-family:'Inter',sans-serif;background:var(--gray-50);color:var(--gray-8
     <h1>Lucid AI Speaking Lab</h1>
     <p>AI 기반 영어 학습 플랫폼</p>
   </div>
-  <p style="font-size:12px;font-weight:600;color:var(--gray-500);margin-bottom:10px">로그인 유형 선택</p>
-  <div class="role-select">
-    <button class="role-btn selected" onclick="selectRole('student',this)"><div class="role-icon">🎒</div><div class="role-name">학생</div></button>
-    <button class="role-btn" onclick="selectRole('teacher',this)"><div class="role-icon">👩‍🏫</div><div class="role-name">선생님</div></button>
-    <button class="role-btn" onclick="selectRole('parent',this)"><div class="role-icon">👨‍👩‍👧</div><div class="role-name">학부모</div></button>
-    <button class="role-btn" onclick="selectRole('admin',this)"><div class="role-icon">🏫</div><div class="role-name">원장/관리자</div></button>
-  </div>
   <div class="form-group">
-    <label class="form-label">아이디 (이메일)</label>
-    <input class="form-input" type="text" placeholder="example@lucid.co.kr" id="loginId">
+    <label class="form-label">이메일</label>
+    <input class="form-input" type="email" placeholder="example@lucid.kr" id="loginId">
   </div>
   <div class="form-group" style="margin-bottom:20px">
     <label class="form-label">비밀번호</label>
-    <input class="form-input" type="password" placeholder="••••••••">
+    <input class="form-input" type="password" placeholder="••••••••" id="loginPw"
+      onkeydown="if(event.key==='Enter')doLogin()">
   </div>
-  <button class="login-btn" onclick="doLogin()">로그인 →</button>
-  <p style="text-align:center;font-size:11px;color:var(--gray-400);margin-top:14px">데모: 아무 값이나 입력 후 로그인하세요</p>
+  <!-- 에러 메시지 -->
+  <div id="loginError" style="display:none;background:var(--red-l);color:#B91C1C;border:1px solid var(--red-m);border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:14px;text-align:center"></div>
+  <!-- 로딩 상태 -->
+  <button class="login-btn" id="loginBtn" onclick="doLogin()">로그인 →</button>
+  <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--gray-100)">
+    <p style="text-align:center;font-size:11px;color:var(--gray-400);margin-bottom:10px">테스트 계정</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+      <button onclick="fillDemo('student@lucid.kr')" style="padding:7px;border-radius:7px;border:1px solid var(--gray-200);background:var(--gray-50);font-size:11px;cursor:pointer;font-family:'Inter',sans-serif;color:var(--gray-600)">🎒 학생</button>
+      <button onclick="fillDemo('teacher@lucid.kr')" style="padding:7px;border-radius:7px;border:1px solid var(--gray-200);background:var(--gray-50);font-size:11px;cursor:pointer;font-family:'Inter',sans-serif;color:var(--gray-600)">👩‍🏫 선생님</button>
+      <button onclick="fillDemo('parent@lucid.kr')" style="padding:7px;border-radius:7px;border:1px solid var(--gray-200);background:var(--gray-50);font-size:11px;cursor:pointer;font-family:'Inter',sans-serif;color:var(--gray-600)">👨‍👩‍👧 학부모</button>
+      <button onclick="fillDemo('admin@lucid.kr')" style="padding:7px;border-radius:7px;border:1px solid var(--gray-200);background:var(--gray-50);font-size:11px;cursor:pointer;font-family:'Inter',sans-serif;color:var(--gray-600)">🏫 관리자</button>
+    </div>
+  </div>
 </div>
 </div>
 </div>
@@ -1316,6 +1321,23 @@ function levelPillHTML(cefrKey) {
   return `<span class="level-pill cefr-${cefrKey.toLowerCase().replace('-','').replace(' ','')}"><span class="level-dot"></span>${L.cefr} · ${L.name}</span>`;
 }
 
+/* ============ SUPABASE CONFIG ============ */
+const SUPABASE_URL = 'https://juigkhtlyzohnaomnwxg.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_TNahM2_HvKQeXhjQlYCFLg_h9VCx_lHKalFnA'; // crearceo key
+
+async function supabaseQuery(table, filters = {}) {
+  let url = `${SUPABASE_URL}/rest/v1/${table}?select=*`;
+  Object.entries(filters).forEach(([k, v]) => { url += `&${k}=eq.${encodeURIComponent(v)}`; });
+  const res = await fetch(url, {
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  return res.json();
+}
+
 /* ============ LOGIN ============ */
 function selectRole(role, btn) {
   currentRole = role;
@@ -1323,10 +1345,51 @@ function selectRole(role, btn) {
   btn.classList.add('selected');
 }
 
-function doLogin() {
-  document.getElementById('loginPage').style.display = 'none';
-  document.getElementById('mainApp').style.display = 'block';
-  setupRole(currentRole);
+function fillDemo(email) {
+  document.getElementById('loginId').value = email;
+  document.getElementById('loginPw').value = 'lucid1234';
+}
+
+async function doLogin() {
+  const email    = document.getElementById('loginId').value.trim();
+  const password = document.getElementById('loginPw').value.trim();
+  const errEl    = document.getElementById('loginError');
+  const btn      = document.getElementById('loginBtn');
+
+  // 빈칸 체크
+  if (!email || !password) {
+    errEl.textContent = '이메일과 비밀번호를 입력해주세요.';
+    errEl.style.display = 'block'; return;
+  }
+
+  // 로딩 상태
+  btn.textContent = '로그인 중...'; btn.disabled = true;
+  errEl.style.display = 'none';
+
+  try {
+    const rows = await supabaseQuery('profiles', { email, password });
+
+    if (!rows || rows.length === 0) {
+      errEl.textContent = '이메일 또는 비밀번호가 올바르지 않습니다.';
+      errEl.style.display = 'block';
+      btn.textContent = '로그인 →'; btn.disabled = false;
+      return;
+    }
+
+    const user = rows[0];
+    currentRole = user.role;
+
+    // 앱 화면 전환
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    setupRole(user.role, user.name);
+
+  } catch (e) {
+    errEl.textContent = '네트워크 오류가 발생했습니다. 다시 시도해주세요.';
+    errEl.style.display = 'block';
+  }
+
+  btn.textContent = '로그인 →'; btn.disabled = false;
 }
 
 function logout() {
@@ -1335,7 +1398,7 @@ function logout() {
   document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display = ''; });
 }
 
-function setupRole(role) {
+function setupRole(role, userName) {
   const nav = document.getElementById('mainNavTabs');
   const av = document.getElementById('userAvatar');
   const un = document.getElementById('userName');
@@ -1346,8 +1409,8 @@ function setupRole(role) {
   if (todayEl) todayEl.textContent = today;
 
   if (role === 'student') {
-    av.style.background = '#DBEAFE'; av.style.color = '#1D4ED8'; av.textContent = 'S';
-    un.textContent = '김민준';
+    av.style.background = '#DBEAFE'; av.style.color = '#1D4ED8'; av.textContent = (userName||'학생')[0];
+    un.textContent = userName || '학생';
     const tabs = [['today','오늘의 학습'],['vocab','단어 예습'],['speaking','AI Speaking'],['feedback','분석결과'],['report','내 리포트']];
     tabs.forEach(([k,l]) => {
       const b = document.createElement('button'); b.className = 'nav-tab'; b.textContent = l;
@@ -1361,8 +1424,8 @@ function setupRole(role) {
     nav.querySelector('.nav-tab').classList.add('active');
 
   } else if (role === 'teacher') {
-    av.style.background = '#EDE9FE'; av.style.color = '#5B21B6'; av.textContent = 'T';
-    un.textContent = '박지혜 선생님';
+    av.style.background = '#EDE9FE'; av.style.color = '#5B21B6'; av.textContent = (userName||'선생님')[0];
+    un.textContent = userName || '선생님';
     buildTeacherStudentTable();
     buildCoachStuList();
     buildWeekReportTable();
@@ -1370,14 +1433,14 @@ function setupRole(role) {
     showPage('page-teacher-students');
 
   } else if (role === 'parent') {
-    av.style.background = '#D1FAE5'; av.style.color = '#047857'; av.textContent = 'P';
-    un.textContent = '김민준 학부모';
+    av.style.background = '#D1FAE5'; av.style.color = '#047857'; av.textContent = (userName||'학부모')[0];
+    un.textContent = userName || '학부모';
     buildParentLevelPanel('A2');
     showPage('page-parent-report');
 
   } else if (role === 'admin') {
-    av.style.background = '#FDE68A'; av.style.color = '#92400E'; av.textContent = 'A';
-    un.textContent = '원장';
+    av.style.background = '#FDE68A'; av.style.color = '#92400E'; av.textContent = (userName||'관리자')[0];
+    un.textContent = userName || '원장';
     buildClassSummary();
     buildClassCards();
     buildLevelRefTable();
