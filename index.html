@@ -3052,12 +3052,6 @@ function saveCurr() { closeCurrModal(); showToast('✅ 새 단원 추가 완료!
 function showLumiWelcome_old() {}
 
 /* ============ LUMI FUNCTIONS ============ */
-const LUMI_GREETINGS = [
-  'Hope today brings you an efficient and meaningful learning experience!',
-  'Ready to explore and grow your English skills today? Let\'s do this!',
-  'Every lesson you complete brings you closer to your goals. Let\'s begin!',
-];
-
 /* ============ LUMI VOICE - ElevenLabs Nichalia ============ */
 const ELEVENLABS_KEY = 'sk_8423aedf0a032e53e9a4df4ed641ad0b5f211e9ad8dbcd11';
 const ELEVENLABS_VOICE_ID = 'XfNU2rGpBa01ckF309OY';
@@ -3065,12 +3059,9 @@ let lumiAudio = null;
 
 async function lumiSpeak(text, onDone) {
   try {
-    // 이전 재생 중지
     if (lumiAudio) { lumiAudio.pause(); lumiAudio = null; }
-
     const clean = (text||'').replace(/[\u{1F300}-\u{1FFFF}]|[⭐💪🚀🌟🎤🧠👋✨]/gu,'').trim();
     if (!clean) return;
-
     const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_VOICE_ID}`, {
       method: 'POST',
       headers: {
@@ -3081,26 +3072,17 @@ async function lumiSpeak(text, onDone) {
       body: JSON.stringify({
         text: clean,
         model_id: 'eleven_monolingual_v1',
-        voice_settings: {
-          stability: 0.4,
-          similarity_boost: 0.9,
-          style: 0.6,
-          use_speaker_boost: true
-        }
+        voice_settings: { stability: 0.4, similarity_boost: 0.9, style: 0.6, use_speaker_boost: true }
       })
     });
-
     if (!res.ok) throw new Error('ElevenLabs error: ' + res.status);
-
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
     lumiAudio = new Audio(url);
     lumiAudio.onended = () => { if (onDone) onDone(); };
     lumiAudio.play();
-
   } catch(e) {
-    console.warn('ElevenLabs TTS 실패, 브라우저 TTS 사용:', e);
-    // Fallback: 브라우저 TTS
+    console.warn('ElevenLabs 실패, 브라우저 TTS 사용:', e);
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance((text||'').trim());
@@ -3111,11 +3093,8 @@ async function lumiSpeak(text, onDone) {
   }
 }
 
-function loadLumiVoice() {} // ElevenLabs 사용시 불필요
-
-if ('speechSynthesis' in window) {
-  window.speechSynthesis.onvoiceschanged = loadLumiVoice;
-}
+function loadLumiVoice() {}
+if ('speechSynthesis' in window) window.speechSynthesis.onvoiceschanged = loadLumiVoice;
 
 /* ============ LUMI WELCOME ============ */
 const LUMI_GREETINGS = [
