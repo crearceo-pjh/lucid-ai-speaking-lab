@@ -3062,27 +3062,19 @@ async function lumiSpeak(text, onDone) {
     if (lumiAudio) { lumiAudio.pause(); lumiAudio = null; }
     const clean = (text||'').replace(/[\u{1F300}-\u{1FFFF}]|[⭐💪🚀🌟🎤🧠👋✨]/gu,'').trim();
     if (!clean) return;
-    const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_VOICE_ID}`, {
+    const res = await fetch('/api/tts', {
       method: 'POST',
-      headers: {
-        'xi-api-key': ELEVENLABS_KEY,
-        'Content-Type': 'application/json',
-        'Accept': 'audio/mpeg'
-      },
-      body: JSON.stringify({
-        text: clean,
-        model_id: 'eleven_monolingual_v1',
-        voice_settings: { stability: 0.4, similarity_boost: 0.9, style: 0.6, use_speaker_boost: true }
-      })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: clean, voice_id: ELEVENLABS_VOICE_ID })
     });
-    if (!res.ok) throw new Error('ElevenLabs error: ' + res.status);
+    if (!res.ok) throw new Error('TTS error: ' + res.status);
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
     lumiAudio = new Audio(url);
     lumiAudio.onended = () => { if (onDone) onDone(); };
     lumiAudio.play();
   } catch(e) {
-    console.warn('ElevenLabs 실패, 브라우저 TTS 사용:', e);
+    console.warn('TTS 실패, 브라우저 TTS 사용:', e);
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance((text||'').trim());
