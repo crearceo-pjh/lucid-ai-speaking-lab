@@ -3053,40 +3053,13 @@ function showLumiWelcome_old() {}
 
 /* ============ LUMI FUNCTIONS ============ */
 /* ============ LUMI VOICE - ElevenLabs Nichalia ============ */
-const ELEVENLABS_KEY = 'sk_be4da5b706f84e28fafe7ee6a020b9d390ded2e5c08b3bee';
-const ELEVENLABS_VOICE_ID = 'XfNU2rGpBa01ckF309OY';
-let lumiAudio = null;
 
-async function lumiSpeak(text, onDone) {
-  try {
-    if (lumiAudio) { lumiAudio.pause(); lumiAudio = null; }
-    const clean = (text||'').replace(/[\u{1F300}-\u{1FFFF}]|[⭐💪🚀🌟🎤🧠👋✨]/gu,'').trim();
-    if (!clean) return;
-    const res = await fetch('/api/tts', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: clean, voice_id: ELEVENLABS_VOICE_ID })
-    });
-    if (!res.ok) throw new Error('TTS error: ' + res.status);
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    lumiAudio = new Audio(url);
-    lumiAudio.onended = () => { if (onDone) onDone(); };
-    lumiAudio.play();
-  } catch(e) {
-    console.warn('TTS 실패, 브라우저 TTS 사용:', e);
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance((text||'').trim());
-      u.lang = 'en-US'; u.pitch = 1.8; u.rate = 1.1;
-      if (onDone) u.onend = onDone;
-      window.speechSynthesis.speak(u);
-    }
-  }
-}
 
-function loadLumiVoice() {}
-if ('speechSynthesis' in window) window.speechSynthesis.onvoiceschanged = loadLumiVoice;
+
+
+function lumiSpeak(text, onDone) { if(onDone) setTimeout(onDone, 100); }
+
+
 
 /* ============ LUMI WELCOME ============ */
 const LUMI_GREETINGS = [
@@ -3117,7 +3090,7 @@ function showLumiWelcome() {
 function closeLumi() {
   const popup = document.getElementById('lumiPopup');
   const box   = document.getElementById('lumiBox');
-  window.speechSynthesis && window.speechSynthesis.cancel();
+  // 목소리 없음
   box.style.transform = 'scale(.9)';
   box.style.opacity   = '0';
   setTimeout(() => {
