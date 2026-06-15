@@ -3217,17 +3217,10 @@ async function sendLumiChat() {
 - 너무 길게 대답하지 마`;
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('/api/chat', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': 'sk-ant-b30c1c4af0741b63d430ad09b0d8fd7e38e6216b017f429618ae7bab77278b75',
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
+      headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 300,
         system: systemPrompt,
         messages: lumiChatHistory.slice(-8)
       })
