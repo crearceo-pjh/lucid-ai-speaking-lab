@@ -625,8 +625,8 @@ body{font-family:'Inter',sans-serif;background:var(--gray-50);color:var(--gray-8
   <div class="card">
     <div style="font-weight:700;font-size:14px;margin-bottom:14px">선생님 코멘트</div>
     <div style="background:var(--blue-l);border-radius:10px;padding:14px;border-left:4px solid var(--blue);font-size:13px;color:var(--gray-700);line-height:1.7">
-      민준 학생은 이번 주 speaking 참여도가 매우 좋았습니다! 특히 동물원 주제에서 다양한 어휘를 활용한 점이 인상적이었습니다. 다음 주에는 과거 시제 표현을 더 자연스럽게 사용하는 연습이 필요합니다. 화이팅! 💪
-      <div style="font-size:11px;color:var(--gray-400);margin-top:6px">— 박지혜 선생님</div>
+      <span id="studentReportComment">이번 주 speaking 참여도가 매우 좋았습니다! 특히 오늘 주제에서 다양한 어휘를 활용한 점이 인상적이었습니다. 다음 주에는 과거 시제 표현을 더 자연스럽게 사용하는 연습이 필요합니다. 화이팅! 💪</span>
+      <div style="font-size:11px;color:var(--gray-400);margin-top:6px" id="teacherCommentName">— 선생님</div>
     </div>
   </div>
 </div>
@@ -771,7 +771,7 @@ body{font-family:'Inter',sans-serif;background:var(--gray-50);color:var(--gray-8
                 <span class="badge badge-purple">🤖 AI 생성 중...</span>
               </div>
             </div>
-            <textarea class="coaching-textarea" id="coachNote" style="min-height:130px" placeholder="선생님 코멘트를 직접 작성하거나 AI 생성 후 수정하세요...">민준 학생은 이번 주 speaking 참여도가 매우 좋았습니다! 특히 동물원 주제에서 다양한 어휘를 활용한 점이 인상적이었습니다. 다음 주에는 과거 시제 표현을 더 자연스럽게 사용하는 연습이 필요합니다. 화이팅! 💪</textarea>
+            <textarea class="coaching-textarea" id="coachNote" style="min-height:130px" placeholder="선생님 코멘트를 직접 작성하거나 AI 생성 후 수정하세요..."></textarea>
             <div style="display:flex;gap:8px;margin-top:10px">
               <button class="btn btn-primary btn-sm" onclick="showToast('💾 저장 완료!')">💾 저장</button>
               <button class="btn btn-outline btn-sm" onclick="showToast('📤 학부모 발송 완료!')">📤 학부모 발송</button>
@@ -867,7 +867,7 @@ body{font-family:'Inter',sans-serif;background:var(--gray-50);color:var(--gray-8
   <div class="report-card-parent" style="margin-bottom:16px">
     <div style="font-size:15px;font-weight:700;margin-bottom:10px">💬 선생님 코멘트</div>
     <div style="background:linear-gradient(135deg,var(--blue-l),var(--purple-l));border-radius:12px;padding:16px;border-left:4px solid var(--blue);font-size:13px;color:var(--gray-700);line-height:1.8">
-      민준 학생은 이번 주 speaking 참여도가 매우 좋았습니다! 특히 동물원 주제에서 다양한 어휘를 활용한 점이 인상적이었습니다. 다음 주에는 과거 시제 표현을 더 자연스럽게 사용하는 연습이 필요합니다. 화이팅! 💪
+      <span id="parentReportComment">이번 주 speaking 참여도가 매우 좋았습니다! 특히 오늘 주제에서 다양한 어휘를 활용한 점이 인상적이었습니다. 다음 주에는 과거 시제 표현을 더 자연스럽게 사용하는 연습이 필요합니다. 화이팅! 💪</span>
     </div>
   </div>
   <div class="report-card-parent">
@@ -2080,6 +2080,11 @@ function setupRole(role, userName) {
     un.textContent = userName || '학생';
     const greet = document.getElementById('bannerGreet');
     if (greet) greet.textContent = `안녕하세요, ${userName}! 👋`;
+    // Update teacher comment with real student name
+    const rc = document.getElementById('studentReportComment');
+    if (rc) rc.textContent = `${userName} 학생은 이번 주 speaking 참여도가 매우 좋았습니다! 특히 오늘 주제에서 다양한 어휘를 활용한 점이 인상적이었습니다. 다음 주에는 과거 시제 표현을 더 자연스럽게 사용하는 연습이 필요합니다. 화이팅! 💪`;
+    const pr = document.getElementById('parentReportComment');
+    if (pr) pr.textContent = `${userName} 학생은 이번 주 speaking 참여도가 매우 좋았습니다! 특히 오늘 주제에서 다양한 어휘를 활용한 점이 인상적이었습니다. 다음 주에는 과거 시제 표현을 더 자연스럽게 사용하는 연습이 필요합니다. 화이팅! 💪`;
     const tabs = [['today','오늘의 학습'],['vocab','단어 예습'],['speaking','AI Speaking'],['feedback','분석결과'],['report','내 리포트']];
     tabs.forEach(([k,l]) => {
       const b = document.createElement('button'); b.className = 'nav-tab'; b.textContent = l;
