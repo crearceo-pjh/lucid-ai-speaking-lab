@@ -1608,14 +1608,14 @@ const LEVELS = {
 };
 
 const STUDENTS = [
-  {id:1,name:'김민준',cefrKey:'A2',ar:'3.2',lexile:'520L',class:'A2 Elementary',teacher:'박지혜',bg:'#3B82F6',score:82,att:'4/5',vocab:84,status:'active'},
-  {id:2,name:'이수아',cefrKey:'A2',ar:'3.8',lexile:'640L',class:'A2 Elementary',teacher:'박지혜',bg:'#10B981',score:91,att:'5/5',vocab:100,status:'active'},
-  {id:3,name:'박지호',cefrKey:'A1',ar:'2.1',lexile:'380L',class:'A1 Beginner',teacher:'박민아',bg:'#F59E0B',score:68,att:'3/5',vocab:60,status:'low'},
-  {id:4,name:'최예린',cefrKey:'B1',ar:'4.6',lexile:'780L',class:'B1 Intermediate',teacher:'이수진',bg:'#7C3AED',score:88,att:'5/5',vocab:90,status:'active'},
-  {id:5,name:'정우진',cefrKey:'Pre-A1',ar:'1.0',lexile:'150L',class:'Pre-A1 Starter',teacher:'박민아',bg:'#6B7280',score:55,att:'2/5',vocab:40,status:'low'},
-  {id:6,name:'강서연',cefrKey:'A2',ar:'3.5',lexile:'590L',class:'A2 Elementary',teacher:'박지혜',bg:'#06B6D4',score:79,att:'4/5',vocab:80,status:'active'},
-  {id:7,name:'윤도현',cefrKey:'B2',ar:'7.0',lexile:'1050L',class:'B2 Upper-Int.',teacher:'이수진',bg:'#8B5CF6',score:85,att:'5/5',vocab:95,status:'active'},
-  {id:8,name:'임채원',cefrKey:'B1',ar:'5.2',lexile:'860L',class:'B1 Intermediate',teacher:'이수진',bg:'#EC4899',score:77,att:'4/5',vocab:75,status:'active'},
+  {id:1,name:'김민준',email:'student@lucid.kr',cefrKey:'A2',ar:'3.2',lexile:'520L',class:'A2 Elementary',teacher:'박지혜',bg:'#3B82F6',score:82,att:'4/5',vocab:84,status:'active'},
+  {id:2,name:'이수아',email:'student2@lucid.kr',cefrKey:'A2',ar:'3.8',lexile:'640L',class:'A2 Elementary',teacher:'박지혜',bg:'#10B981',score:91,att:'5/5',vocab:100,status:'active'},
+  {id:3,name:'박지호',email:'student3@lucid.kr',cefrKey:'A1',ar:'2.1',lexile:'380L',class:'A1 Beginner',teacher:'박민아',bg:'#F59E0B',score:68,att:'3/5',vocab:60,status:'low'},
+  {id:4,name:'최예린',email:'student4@lucid.kr',cefrKey:'B1',ar:'4.6',lexile:'780L',class:'B1 Intermediate',teacher:'이수진',bg:'#7C3AED',score:88,att:'5/5',vocab:90,status:'active'},
+  {id:5,name:'정우진',email:'student5@lucid.kr',cefrKey:'Pre-A1',ar:'1.0',lexile:'150L',class:'Pre-A1 Starter',teacher:'박민아',bg:'#6B7280',score:55,att:'2/5',vocab:40,status:'low'},
+  {id:6,name:'강서연',email:'student6@lucid.kr',cefrKey:'A2',ar:'3.5',lexile:'590L',class:'A2 Elementary',teacher:'박지혜',bg:'#06B6D4',score:79,att:'4/5',vocab:80,status:'active'},
+  {id:7,name:'윤도현',email:'student7@lucid.kr',cefrKey:'B2',ar:'7.0',lexile:'1050L',class:'B2 Upper-Int.',teacher:'이수진',bg:'#8B5CF6',score:85,att:'5/5',vocab:95,status:'active'},
+  {id:8,name:'임채원',email:'student8@lucid.kr',cefrKey:'B1',ar:'5.2',lexile:'860L',class:'B1 Intermediate',teacher:'이수진',bg:'#EC4899',score:77,att:'4/5',vocab:75,status:'active'},
 ];
 
 const VOCAB_DATA = {
@@ -2140,6 +2140,7 @@ async function doLogin() {
     }
 
     currentRole = user.role;
+    currentStudentLevel = user.level || 'A2';
     document.getElementById('loginPage').style.display = 'none';
     document.getElementById('mainApp').style.display = 'block';
     setupRole(user.role, user.name);
@@ -2174,9 +2175,12 @@ function setupRole(role, userName) {
     un.textContent = userName || '학생';
     const greet = document.getElementById('bannerGreet');
     if (greet) greet.textContent = `안녕하세요, ${userName}! 👋`;
-    // Update teacher comment with real student name
-    const rc = document.getElementById('studentReportComment');
-    if (rc) rc.textContent = `${userName} 학생은 이번 주 speaking 참여도가 매우 좋았습니다! 특히 오늘 주제에서 다양한 어휘를 활용한 점이 인상적이었습니다. 다음 주에는 과거 시제 표현을 더 자연스럽게 사용하는 연습이 필요합니다. 화이팅! 💪`;
+    // DB에서 가져온 레벨 적용
+    const studentLevel = currentStudentLevel || 'A2';
+    buildStudentLevelPanel(studentLevel);
+    buildVocab(studentLevel);
+    buildSpeakingForLevel(studentLevel);
+    const rc = document.getElementById('studentReportComment'); `${userName} 학생은 이번 주 speaking 참여도가 매우 좋았습니다! 특히 오늘 주제에서 다양한 어휘를 활용한 점이 인상적이었습니다. 다음 주에는 과거 시제 표현을 더 자연스럽게 사용하는 연습이 필요합니다. 화이팅! 💪`;
     const pr = document.getElementById('parentReportComment');
     if (pr) pr.textContent = `${userName} 학생은 이번 주 speaking 참여도가 매우 좋았습니다! 특히 오늘 주제에서 다양한 어휘를 활용한 점이 인상적이었습니다. 다음 주에는 과거 시제 표현을 더 자연스럽게 사용하는 연습이 필요합니다. 화이팅! 💪`;
     // Update feedback page name
@@ -2193,10 +2197,7 @@ function setupRole(role, userName) {
       const b = document.createElement('button'); b.className = 'nav-tab'; b.textContent = l;
       b.onclick = () => goStu(k); nav.appendChild(b);
     });
-    buildStudentLevelPanel('A2');
-    buildVocab('A2');
     buildQuiz();
-    buildSpeakingForLevel('A2');
     showPage('page-student-today');
     nav.querySelector('.nav-tab').classList.add('active');
     setTimeout(showLumiWelcome, 600);
@@ -3126,21 +3127,44 @@ function selectCefr(btn, cefrKey) {
   if (li) li.value = L.lexileNum + 'L';
 }
 
-function applyLevelChange() {
+async function applyLevelChange() {
   const s = STUDENTS.find(x => x.id === editingStudentId);
   if (!s) return;
   const newAr = document.getElementById('arInput')?.value || s.ar;
   const newLex = document.getElementById('lexileInput')?.value || s.lexile;
+
+  // 로컬 업데이트
   s.cefrKey = selectedCefrKey;
   s.ar = newAr;
   s.lexile = newLex;
-  // refresh tables
+
+  // Supabase DB 업데이트
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/profiles?email=eq.${encodeURIComponent(s.email || '')}`, {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({ level: selectedCefrKey })
+    });
+    if (res.ok) {
+      showToast(`✅ ${s.name} 레벨이 ${selectedCefrKey}로 저장됐어요!`);
+    } else {
+      showToast(`✅ ${s.name} 레벨이 ${selectedCefrKey}로 변경됐어요! (로컬 저장)`);
+    }
+  } catch(e) {
+    showToast(`✅ ${s.name} 레벨이 ${selectedCefrKey}로 변경됐어요!`);
+  }
+
+  // 테이블 새로고침
   buildLevelEditTable();
   buildTeacherStudentTable();
   buildAdminStudentTable();
   buildAdminReportTable();
   document.getElementById('levelModal').classList.remove('show');
-  showToast(`✅ ${s.name} 레벨이 ${selectedCefrKey}로 변경되었습니다!`);
 }
 
 function saveAllLevels() { showToast('💾 전체 레벨 저장 완료!'); }
