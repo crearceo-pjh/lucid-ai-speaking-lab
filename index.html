@@ -401,7 +401,7 @@ body{font-family:'Inter',sans-serif;background:var(--gray-50);color:var(--gray-8
   <div class="grid-2" style="margin-bottom:20px">
     <div class="lesson-step-card completed" onclick="goStu('vocab')">
       <div class="step-icon-box" style="background:var(--green-l)">✅</div>
-      <div class="step-card-info"><h4>Vocabulary Preview</h4><p id="vocabCardSub">단어 10개 완료 · 5분</p></div>
+      <div class="step-card-info"><h4>Vocabulary Preview</h4><p id="vocabCardSub">단어 10개 완료 · Phonics Fun · 5분</p></div>
       <span class="badge badge-green">완료</span>
     </div>
     <div class="lesson-step-card active" onclick="goStu('listening')">
@@ -459,22 +459,22 @@ body{font-family:'Inter',sans-serif;background:var(--gray-50);color:var(--gray-8
   <div class="section-sub" id="listeningLevelNote">대화를 듣고 빈칸을 채워보세요</div>
   <div class="card card-lg" style="margin-bottom:18px">
     <div style="background:var(--gray-50);border-radius:10px;padding:18px;margin-bottom:14px;font-size:15px;line-height:2;color:var(--gray-700)">
-      <p><strong>Sarah:</strong> Let's go to the zoo today!</p>
-      <p><strong>Tom:</strong> Great idea! I love watching <span id="blank1" style="display:inline-block;border-bottom:2px solid var(--blue);min-width:80px;text-align:center;color:var(--blue);font-weight:700">______</span>.</p>
-      <p><strong>Sarah:</strong> Me too! The <span id="blank2" style="display:inline-block;border-bottom:2px solid var(--blue);min-width:80px;text-align:center;color:var(--blue);font-weight:700">______</span> are so cute.</p>
-      <p><strong>Tom:</strong> I think <span id="blank3" style="display:inline-block;border-bottom:2px solid var(--blue);min-width:80px;text-align:center;color:var(--blue);font-weight:700">______</span> are the most amazing animals.</p>
+      <p><strong>Lumi:</strong> Let's practice short vowel A! Listen carefully! 👂</p>
+      <p><strong>Tom:</strong> Look! A <span id="blank1" style="display:inline-block;border-bottom:2px solid var(--blue);min-width:80px;text-align:center;color:var(--blue);font-weight:700">______</span> is sitting on the mat! (cat / dog / pig)</p>
+      <p><strong>Sam:</strong> Yes! And the <span id="blank2" style="display:inline-block;border-bottom:2px solid var(--blue);min-width:80px;text-align:center;color:var(--blue);font-weight:700">______</span> has a map inside! (bag / cup / box)</p>
+      <p><strong>Tom:</strong> Wow! That <span id="blank3" style="display:inline-block;border-bottom:2px solid var(--blue);min-width:80px;text-align:center;color:var(--blue);font-weight:700">______</span> can wear a hat! (cat / bat / rat)</p>
     </div>
     <div style="display:flex;gap:10px;justify-content:center;margin-bottom:14px">
       <button class="btn btn-outline" onclick="showToast('🎧 오디오 재생 중...')">▶ 대화 듣기</button>
       <button class="btn btn-outline" onclick="showToast('🔄 다시 듣기...')">🔄 다시 듣기</button>
     </div>
     <div id="listeningAnswers">
-      <p style="font-size:12px;color:var(--gray-500);margin-bottom:8px">정답을 선택하세요 (Blank 1):</p>
+      <p style="font-size:12px;color:var(--gray-500);margin-bottom:8px">정답을 선택하세요 (Blank 1) — Short vowel A /æ/:</p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <button class="quiz-option" onclick="checkL(this,'monkeys',1)">monkeys</button>
-        <button class="quiz-option" onclick="checkL(this,'penguins',1)">penguins</button>
-        <button class="quiz-option" onclick="checkL(this,'lions',1)">lions</button>
-        <button class="quiz-option" onclick="checkL(this,'elephants',1)">elephants</button>
+        <button class="quiz-option" onclick="checkL(this,'cat',1)">cat 🐱</button>
+        <button class="quiz-option" onclick="checkL(this,'pig',1)">pig 🐷</button>
+        <button class="quiz-option" onclick="checkL(this,'cup',1)">cup ☕</button>
+        <button class="quiz-option" onclick="checkL(this,'dog',1)">dog 🐶</button>
       </div>
     </div>
   </div>
@@ -532,7 +532,7 @@ body{font-family:'Inter',sans-serif;background:var(--gray-50);color:var(--gray-8
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px">
       <div style="font-size:44px">🎉</div>
       <div>
-        <div style="font-size:19px;font-weight:800;color:var(--gray-900)">잘했어요, 민준!</div>
+        <div style="font-size:19px;font-weight:800;color:var(--gray-900)" id="feedbackStudentName">잘했어요!</div>
         <div style="font-size:13px;color:var(--gray-500);margin-top:2px">At the Zoo · AI 대화 완료</div>
         <div id="feedbackLevelRow" style="margin-top:6px"></div>
       </div>
@@ -840,7 +840,7 @@ body{font-family:'Inter',sans-serif;background:var(--gray-50);color:var(--gray-8
 <div id="page-parent-report" class="page">
 <div class="container" style="max-width:780px">
   <div class="welcome-banner" style="background:linear-gradient(135deg,#0D9488,#7C3AED)">
-    <h2>김민준 학부모님, 안녕하세요! 👋</h2>
+    <h2 id="parentBannerGreet">학부모님, 안녕하세요! 👋</h2>
     <p>자녀의 이번 주 영어 학습 결과입니다</p>
     <div class="welcome-meta">
       <div class="welcome-meta-item">📅 2025년 6월 2주차</div>
@@ -1619,41 +1619,44 @@ const STUDENTS = [
 ];
 
 const VOCAB_DATA = {
+  // === Phonics Fun 1 (Pre-A1) - Alphabet Letters & Sounds ===
   'Pre-A1': [
-    {en:'cat',ko:'고양이',ex:'I see a cat.',diff:'⭐'},
-    {en:'dog',ko:'강아지',ex:'The dog is big.',diff:'⭐'},
-    {en:'red',ko:'빨간색',ex:'The apple is red.',diff:'⭐'},
-    {en:'one',ko:'하나',ex:'One cat is here.',diff:'⭐'},
-    {en:'hot',ko:'뜨거운',ex:'The soup is hot.',diff:'⭐'},
-    {en:'cold',ko:'차가운',ex:'Water is cold.',diff:'⭐'},
-    {en:'big',ko:'큰',ex:'An elephant is big.',diff:'⭐'},
-    {en:'small',ko:'작은',ex:'A mouse is small.',diff:'⭐'},
-    {en:'run',ko:'달리다',ex:'I can run fast.',diff:'⭐'},
-    {en:'jump',ko:'점프하다',ex:'Frogs can jump.',diff:'⭐'},
+    {en:'apple',ko:'사과',ex:'An apple is red and sweet.',diff:'⭐',sound:'Aa /æ/'},
+    {en:'ant',ko:'개미',ex:'A little ant can carry food.',diff:'⭐',sound:'Aa /æ/'},
+    {en:'igloo',ko:'이글루',ex:'An igloo is made of ice.',diff:'⭐',sound:'Ii /ɪ/'},
+    {en:'ink',ko:'잉크',ex:'The ink is black.',diff:'⭐',sound:'Ii /ɪ/'},
+    {en:'egg',ko:'달걀',ex:'I see a big egg.',diff:'⭐',sound:'Ee /ɛ/'},
+    {en:'elephant',ko:'코끼리',ex:'An elephant is very big.',diff:'⭐',sound:'Ee /ɛ/'},
+    {en:'octopus',ko:'문어',ex:'An octopus has eight arms.',diff:'⭐',sound:'Oo /ɒ/'},
+    {en:'ox',ko:'황소',ex:'The ox is on the farm.',diff:'⭐',sound:'Oo /ɒ/'},
+    {en:'umbrella',ko:'우산',ex:'I use an umbrella in the rain.',diff:'⭐',sound:'Uu /ʌ/'},
+    {en:'under',ko:'아래에',ex:'The cat is under the table.',diff:'⭐',sound:'Uu /ʌ/'},
   ],
+  // === Phonics Fun 1 (A1) - Consonants Units 3-4 ===
   'A1': [
-    {en:'family',ko:'가족',ex:'My family is happy.',diff:'⭐⭐'},
-    {en:'breakfast',ko:'아침식사',ex:'I eat breakfast every day.',diff:'⭐⭐'},
-    {en:'school',ko:'학교',ex:'I go to school by bus.',diff:'⭐⭐'},
-    {en:'friend',ko:'친구',ex:'She is my best friend.',diff:'⭐⭐'},
-    {en:'happy',ko:'행복한',ex:'I feel happy today.',diff:'⭐⭐'},
-    {en:'play',ko:'놀다',ex:'We play in the park.',diff:'⭐⭐'},
-    {en:'teacher',ko:'선생님',ex:'My teacher is kind.',diff:'⭐⭐'},
-    {en:'hungry',ko:'배고픈',ex:'I am hungry now.',diff:'⭐⭐'},
-    {en:'sleep',ko:'자다',ex:'I sleep at ten.',diff:'⭐⭐'},
-    {en:'read',ko:'읽다',ex:'I read books every night.',diff:'⭐⭐'},
+    {en:'ball',ko:'공',ex:'I kick the ball.',diff:'⭐⭐',sound:'Bb /b/'},
+    {en:'bear',ko:'곰',ex:'A bear is in the forest.',diff:'⭐⭐',sound:'Bb /b/'},
+    {en:'panda',ko:'판다',ex:'A panda eats bamboo.',diff:'⭐⭐',sound:'Pp /p/'},
+    {en:'desk',ko:'책상',ex:'My book is on the desk.',diff:'⭐⭐',sound:'Dd /d/'},
+    {en:'duck',ko:'오리',ex:'A duck can swim.',diff:'⭐⭐',sound:'Dd /d/'},
+    {en:'tiger',ko:'호랑이',ex:'A tiger runs fast.',diff:'⭐⭐',sound:'Tt /t/'},
+    {en:'fish',ko:'물고기',ex:'A fish lives in water.',diff:'⭐⭐',sound:'Ff /f/'},
+    {en:'gate',ko:'문',ex:'Open the gate, please.',diff:'⭐⭐',sound:'Gg /ɡ/'},
+    {en:'kangaroo',ko:'캥거루',ex:'A kangaroo can jump high.',diff:'⭐⭐',sound:'Kk /k/'},
+    {en:'king',ko:'왕',ex:'The king has a crown.',diff:'⭐⭐',sound:'Kk /k/'},
   ],
+  // === Phonics Fun 2 (A2) - Short Vowels ===
   'A2': [
-    {en:'lion',ko:'사자',ex:'The lion is the king of the jungle.',diff:'⭐⭐'},
-    {en:'tiger',ko:'호랑이',ex:'A tiger has orange and black stripes.',diff:'⭐⭐'},
-    {en:'elephant',ko:'코끼리',ex:'The elephant has a very long nose.',diff:'⭐⭐'},
-    {en:'giraffe',ko:'기린',ex:'A giraffe has a very long neck.',diff:'⭐⭐⭐'},
-    {en:'monkey',ko:'원숭이',ex:'Monkeys can climb trees fast.',diff:'⭐⭐'},
-    {en:'penguin',ko:'펭귄',ex:'Penguins live in cold places.',diff:'⭐⭐'},
-    {en:'zebra',ko:'얼룩말',ex:'A zebra has black and white stripes.',diff:'⭐⭐⭐'},
-    {en:'hippo',ko:'하마',ex:'Hippos love to swim in rivers.',diff:'⭐⭐⭐'},
-    {en:'parrot',ko:'앵무새',ex:'A parrot can copy what you say.',diff:'⭐⭐⭐'},
-    {en:'kangaroo',ko:'캥거루',ex:'Kangaroos carry their babies in a pouch.',diff:'⭐⭐⭐'},
+    {en:'cat',ko:'고양이',ex:'The cat sat on the mat.',diff:'⭐⭐',sound:'Short a /æ/'},
+    {en:'bag',ko:'가방',ex:'I have a red bag.',diff:'⭐⭐',sound:'Short a /æ/'},
+    {en:'hen',ko:'암탉',ex:'The hen has ten eggs.',diff:'⭐⭐',sound:'Short e /ɛ/'},
+    {en:'bed',ko:'침대',ex:'I sleep in my bed.',diff:'⭐⭐',sound:'Short e /ɛ/'},
+    {en:'pig',ko:'돼지',ex:'The pig is pink and fat.',diff:'⭐⭐',sound:'Short i /ɪ/'},
+    {en:'ship',ko:'배(선박)',ex:'A big ship is on the sea.',diff:'⭐⭐',sound:'Short i /ɪ/'},
+    {en:'fox',ko:'여우',ex:'A fox is clever.',diff:'⭐⭐',sound:'Short o /ɒ/'},
+    {en:'box',ko:'상자',ex:'Put the toys in the box.',diff:'⭐⭐',sound:'Short o /ɒ/'},
+    {en:'bug',ko:'벌레',ex:'A bug is on the leaf.',diff:'⭐⭐',sound:'Short u /ʌ/'},
+    {en:'cup',ko:'컵',ex:'I drink water from a cup.',diff:'⭐⭐',sound:'Short u /ʌ/'},
   ],
   'B1': [
     {en:'environment',ko:'환경',ex:'We must protect the environment.',diff:'⭐⭐⭐'},
@@ -1690,34 +1693,125 @@ const CLASSES = [
 ];
 
 const CURRICULUM = [
+  // === Phonics Fun 1 - Alphabet Letters & Sounds (Pre-A1) ===
   {cefrKey:'Pre-A1',units:[
-    {name:'Unit 1',topic:'Hello! Nice to Meet You',ar:'0.5–1.0',lexile:'BR–100L',vocab:'hello, name, how, are, you',mission:'Say your name and age.'},
-    {name:'Unit 2',topic:'Colors and Numbers',ar:'0.8–1.2',lexile:'100–180L',vocab:'red, blue, one, two, three',mission:'Count objects and name colors.'},
+    {name:'Unit 1',topic:'The Alphabet 🔤',ar:'0.5–0.8',lexile:'BR–100L',
+     vocab:'Aa, Bb, Cc, Dd, Ee, Ff, Gg',mission:'Point and say each letter and its sound.',
+     listening:'A: "What letter is this?" B: "It is the letter A! /ae/!"',
+     words:['apple','ant','ball','bear','cat','dog']},
+    {name:'Unit 2',topic:'Vowels — Aa·Ii·Ee·Oo·Uu 🍎',ar:'0.6–1.0',lexile:'BR–150L',
+     vocab:'apple, ant, igloo, ink, egg, elephant, octopus, ox, umbrella, under',mission:'Say the vowel sounds and words.',
+     listening:'A: "Apple starts with /æ/!" B: "Ant starts with /æ/ too!"',
+     words:['apple','ant','igloo','ink','egg','elephant','octopus','umbrella']},
+    {name:'Unit 3',topic:'Consonants — Bb·Pp·Dd·Tt 🐻',ar:'0.7–1.2',lexile:'100–200L',
+     vocab:'ball, bear, bus, panda, pig, pizza, desk, doll, duck, taxi, tent, tiger',mission:'Match letters to sounds and words.',
+     listening:'A: "Ball starts with B!" B: "Bus starts with B too!"',
+     words:['ball','bear','panda','desk','duck','tiger']},
+    {name:'Unit 4',topic:'Consonants — Ff·Vv·Gg·Kk 🐟',ar:'0.8–1.3',lexile:'150–220L',
+     vocab:'fish, fork, fox, van, vase, violin, gate, golf, guitar, kangaroo, key, king',mission:'Say f, v, g, k sounds clearly.',
+     listening:'A: "Fish starts with F!" B: "Fork starts with F too!"',
+     words:['fish','fox','van','gate','kangaroo','king']},
+    {name:'Unit 5',topic:'Consonants — Ss·Zz·Ll·Rr 🦁',ar:'0.9–1.4',lexile:'180–250L',
+     vocab:'seal, soap, sock, zebra, zip, zoo, lamp, leaf, lion, radio, ring, robot',mission:'Practice s, z, l, r sounds.',
+     listening:'A: "Seal starts with S!" B: "Soap starts with S too!"',
+     words:['seal','sock','zebra','zoo','lamp','lion']},
+    {name:'Unit 6',topic:'Consonants — Mm·Nn·Cc·Qq 🐒',ar:'0.9–1.5',lexile:'180–270L',
+     vocab:'map, milk, monkey, nest, nurse, nut, candy, car, cow, queen, quilt, quiz',mission:'Say m, n, c, q sounds.',
+     listening:'A: "Monkey starts with M!" B: "Map starts with M too!"',
+     words:['map','monkey','nest','nut','candy','queen']},
   ]},
+  // === Phonics Fun 2 - Short Vowels (A1) ===
   {cefrKey:'A1',units:[
-    {name:'Unit 1',topic:'My Family',ar:'1.5–2.0',lexile:'200–320L',vocab:'mom, dad, sister, brother, family',mission:'Describe your family.'},
-    {name:'Unit 2',topic:'My Daily Routine',ar:'2.0–2.4',lexile:'320–420L',vocab:'wake, eat, school, sleep, every day',mission:'Tell your daily schedule.'},
+    {name:'Unit 1',topic:'Short Vowel a /æ/ 🐱',ar:'1.0–1.5',lexile:'200–320L',
+     vocab:'cat, bat, hat, man, bag, jam, map, rat, van, wax',mission:'Read and say short vowel a words.',
+     listening:'A: "The cat sat on the mat." B: "The bat has a hat!"',
+     words:['cat','bat','hat','man','bag','jam']},
+    {name:'Unit 2',topic:'Short Vowel e /ɛ/ 🐔',ar:'1.0–1.5',lexile:'200–330L',
+     vocab:'hen, bed, red, ten, web, net, pet, leg, pen, set',mission:'Read and say short vowel e words.',
+     listening:'A: "The hen has ten eggs." B: "My pet is in the bed!"',
+     words:['hen','bed','red','ten','web','pet']},
+    {name:'Unit 3',topic:'Short Vowel i /ɪ/ 🐷',ar:'1.1–1.6',lexile:'220–350L',
+     vocab:'pig, big, dig, fig, wig, hip, lip, rip, tip, zip',mission:'Read and say short vowel i words.',
+     listening:'A: "The big pig can dig." B: "A ship has a big lip!"',
+     words:['pig','big','dig','hip','ship','zip']},
+    {name:'Unit 4',topic:'Short Vowel o /ɒ/ 🦊',ar:'1.1–1.6',lexile:'220–360L',
+     vocab:'fox, box, hop, top, mop, dot, hot, log, pop, rob',mission:'Read and say short vowel o words.',
+     listening:'A: "A fox is in the box." B: "Hop on top of the log!"',
+     words:['fox','box','hop','top','mop','hot']},
+    {name:'Unit 5',topic:'Short Vowel u /ʌ/ 🐛',ar:'1.2–1.7',lexile:'240–380L',
+     vocab:'bug, cup, run, sun, bus, fun, gut, hug, mud, nut',mission:'Read and say short vowel u words.',
+     listening:'A: "A bug is in the cup." B: "Run to the sun is fun!"',
+     words:['bug','cup','run','sun','bus','fun']},
   ]},
+  // === Phonics Fun 3 - Long Vowels (A2) ===
   {cefrKey:'A2',units:[
-    {name:'Unit 3',topic:'At the Zoo 🦁',ar:'2.5–3.2',lexile:'420–560L',vocab:'lion, tiger, elephant, giraffe, monkey',mission:'Talk about your favorite animal.'},
-    {name:'Unit 4',topic:'At the Restaurant',ar:'3.0–3.9',lexile:'520–700L',vocab:'menu, order, waiter, delicious, bill',mission:'Order food at a restaurant.'},
+    {name:'Unit 1',topic:'Long Vowel a /eɪ/ — a_e 🎂',ar:'1.5–2.5',lexile:'300–480L',
+     vocab:'cake, gate, lake, name, race, save, tape, wave, cave, lace',mission:'Read long vowel a words with a_e pattern.',
+     listening:'A: "I made a cake by the lake." B: "My name is in the race!"',
+     words:['cake','gate','lake','name','race','wave']},
+    {name:'Unit 2',topic:'Long Vowel i /aɪ/ — i_e 🪁',ar:'1.6–2.6',lexile:'320–500L',
+     vocab:'bike, fine, hide, kite, lime, mine, pine, ride, side, vine',mission:'Read long vowel i words with i_e pattern.',
+     listening:'A: "I ride my bike and fly a kite." B: "Hide on the fine pine side!"',
+     words:['bike','kite','hide','ride','fine','pine']},
+    {name:'Unit 3',topic:'Long Vowel o /oʊ/ — o_e 🌹',ar:'1.7–2.7',lexile:'340–520L',
+     vocab:'bone, cone, home, hole, mole, nose, note, pole, rope, rose',mission:'Read long vowel o words with o_e pattern.',
+     listening:'A: "The mole dug a hole by the pole." B: "Write a note about the rose!"',
+     words:['bone','cone','home','nose','note','rose']},
+    {name:'Unit 4',topic:'Long Vowel u /juː/ — u_e 🧊',ar:'1.8–2.8',lexile:'360–540L',
+     vocab:'cube, cute, dune, fuse, huge, June, mule, mute, rule, tune',mission:'Read long vowel u words with u_e pattern.',
+     listening:'A: "A cute mule hums a tune in June." B: "The huge cube is mute!"',
+     words:['cube','cute','huge','June','mule','tune']},
+    {name:'Unit 5',topic:'Long Vowel e /iː/ — ee/ea 🌊',ar:'2.0–3.0',lexile:'380–580L',
+     vocab:'bee, feet, keep, meet, need, see, tree, bean, eat, leaf',mission:'Read long vowel e words with ee and ea patterns.',
+     listening:'A: "I see a bee in the tree." B: "Eat a bean leaf by the sea!"',
+     words:['bee','feet','tree','bean','eat','leaf']},
   ]},
+  // === Phonics Fun 5 - Blends & Digraphs (B1) ===
   {cefrKey:'B1',units:[
-    {name:'Unit 5',topic:'Travel Experiences',ar:'4.0–5.0',lexile:'700–850L',vocab:'itinerary, culture, souvenir, landmark, explore',mission:'Describe a travel experience.'},
-    {name:'Unit 6',topic:'Environment & Sustainability',ar:'5.0–5.9',lexile:'850–1000L',vocab:'pollution, recycle, renewable, ecosystem, carbon',mission:'Discuss an environmental issue.'},
+    {name:'Unit 1',topic:'l Blends — bl cl fl gl pl sl 🌸',ar:'2.5–4.0',lexile:'500–750L',
+     vocab:'black, block, clap, clock, flag, flat, glad, glass, plan, play, slam, slip',mission:'Read and blend consonant l-blend words.',
+     listening:'A: "The black clock on the flat block." B: "I clap and play the glad plan!"',
+     words:['black','clap','flag','glad','plan','play']},
+    {name:'Unit 2',topic:'r Blends — br cr dr fr gr tr 🌳',ar:'2.6–4.1',lexile:'520–760L',
+     vocab:'brag, brim, crab, crop, drag, drip, frog, from, grab, grin, trap, trim',mission:'Read and blend consonant r-blend words.',
+     listening:'A: "The crab drips from the frog trap." B: "Grab and trim the grin brim!"',
+     words:['brag','crab','drag','frog','grab','trap']},
+    {name:'Unit 3',topic:'s Blends — sk sm sn sp st sw 🏂',ar:'2.7–4.2',lexile:'540–780L',
+     vocab:'skip, skin, smell, smile, snap, snip, spot, spin, step, stop, swim, swing',mission:'Read and blend s-blend words.',
+     listening:'A: "Skip and swim, stop and spin." B: "Smile and snap the swing step!"',
+     words:['skip','smell','snap','spot','step','swim']},
+    {name:'Unit 4',topic:'Digraphs — ch sh th ph 🔤',ar:'3.0–4.5',lexile:'580–820L',
+     vocab:'chat, chip, chop, ship, shop, shot, that, them, this, phone, photo, phrase',mission:'Read digraph words ch, sh, th, ph.',
+     listening:'A: "Chat on the phone about the photo." B: "This ship has a chip on the shop!"',
+     words:['chat','chip','ship','shop','that','phone']},
+    {name:'Unit 5',topic:'Digraphs — wh ck ng nk 🔔',ar:'3.1–4.6',lexile:'600–840L',
+     vocab:'what, when, where, which, back, black, duck, king, ring, sing, bank, drink',mission:'Read digraph words wh, ck, ng, nk.',
+     listening:'A: "Which king can sing and ring?" B: "What duck quacks by the black bank?"',
+     words:['what','when','back','duck','ring','sing']},
+    {name:'Unit 6',topic:'Vowel Digraphs — oo (short & long), ew 🌕',ar:'3.2–4.8',lexile:'620–860L',
+     vocab:'book, cook, foot, good, hood, look, food, moon, pool, room, tool, zoo, blew, brew, chew, crew, drew, flew',mission:'Read oo and ew vowel digraph words.',
+     listening:'A: "Look! The cook at the zoo made good food." B: "The crew blew and flew to the moon pool!"',
+     words:['book','cook','food','moon','pool','blew']},
   ]},
+  // === Advanced (B2) ===
   {cefrKey:'B2',units:[
-    {name:'Unit 7',topic:'Critical Thinking & Debate',ar:'6.0–7.5',lexile:'1000–1200L',vocab:'hypothesis, evidence, counterargument, bias, nuance',mission:'Argue both sides of a debate topic.'},
-    {name:'Unit 8',topic:'Academic Presentations',ar:'7.0–8.5',lexile:'1100–1300L',vocab:'paradigm, implication, consequently, rhetoric, phenomena',mission:'Give a 2-minute academic presentation.'},
+    {name:'Unit 1',topic:'Critical Thinking & Debate 🎓',ar:'6.0–7.5',lexile:'1000–1200L',
+     vocab:'hypothesis, evidence, counterargument, bias, nuance, perspective',mission:'Argue both sides of a debate topic.',
+     listening:'A: "What is your hypothesis?" B: "The evidence shows a clear bias."',
+     words:['hypothesis','evidence','counterargument','bias','nuance','perspective']},
+    {name:'Unit 2',topic:'Academic Presentations 📊',ar:'7.0–8.5',lexile:'1100–1300L',
+     vocab:'paradigm, implication, consequently, rhetoric, phenomena, ambiguity',mission:'Give a 2-minute academic presentation.',
+     listening:'A: "The implications of this paradigm are vast." B: "Consequently, we must address the phenomena."',
+     words:['paradigm','implication','consequently','rhetoric','phenomena','ambiguity']},
   ]},
 ];
 
 const QUIZ_DATA = [
-  {q:'다음 중 "코끼리"를 영어로 바르게 쓴 것은?',opts:['tiger','elephant','giraffe','monkey'],ans:'elephant'},
-  {q:'빈칸: "The ___ has a very long neck."',opts:['hippo','zebra','giraffe','lion'],ans:'giraffe'},
-  {q:'"I go zoo yesterday."의 올바른 문장은?',opts:['I go to zoo yesterday.','I went to the zoo yesterday.','I will go zoo.','I gone the zoo.'],ans:'I went to the zoo yesterday.'},
-  {q:'"원숭이"를 뜻하는 단어는?',opts:['parrot','penguin','monkey','kangaroo'],ans:'monkey'},
-  {q:'"more big"의 올바른 비교급은?',opts:['more bigger','big more','bigger','most big'],ans:'bigger'},
+  {q:'Short vowel A: "The ___ sat on the mat." 빈칸에 알맞은 단어는?',opts:['cat','kit','cut','cot'],ans:'cat'},
+  {q:'Which word has the short vowel A /æ/ sound?',opts:['cake','bike','bag','bug'],ans:'bag'},
+  {q:'Short vowel E: "The hen has ___ eggs." 빈칸에 알맞은 수는?',opts:['ten','tin','ton','tan'],ans:'ten'},
+  {q:'"pig"와 같은 모음 소리를 가진 단어는?',opts:['pig','bag','peg','pug'],ans:'pig'},
+  {q:'Short vowel U: "A ___ is in the cup." 빈칸에 알맞은 단어는?',opts:['bag','bug','big','bog'],ans:'bug'},
 ];
 
 const AI_RESPONSES = [
@@ -2085,6 +2179,15 @@ function setupRole(role, userName) {
     if (rc) rc.textContent = `${userName} 학생은 이번 주 speaking 참여도가 매우 좋았습니다! 특히 오늘 주제에서 다양한 어휘를 활용한 점이 인상적이었습니다. 다음 주에는 과거 시제 표현을 더 자연스럽게 사용하는 연습이 필요합니다. 화이팅! 💪`;
     const pr = document.getElementById('parentReportComment');
     if (pr) pr.textContent = `${userName} 학생은 이번 주 speaking 참여도가 매우 좋았습니다! 특히 오늘 주제에서 다양한 어휘를 활용한 점이 인상적이었습니다. 다음 주에는 과거 시제 표현을 더 자연스럽게 사용하는 연습이 필요합니다. 화이팅! 💪`;
+    // Update feedback page name
+    const fn = document.getElementById('feedbackStudentName');
+    if (fn) fn.textContent = `잘했어요, ${userName}!`;
+    // Update parent report greeting
+    const pg = document.querySelector('#page-parent-report .welcome-banner h2');
+    if (pg) pg.textContent = `${userName} 학부모님, 안녕하세요! 👋`;
+    // Update parent level panel title
+    const plt = document.getElementById('parentLevelPanelTitle');
+    if (plt) plt.textContent = `📊 ${userName}의 현재 영어 레벨`;
     const tabs = [['today','오늘의 학습'],['vocab','단어 예습'],['speaking','AI Speaking'],['feedback','분석결과'],['report','내 리포트']];
     tabs.forEach(([k,l]) => {
       const b = document.createElement('button'); b.className = 'nav-tab'; b.textContent = l;
@@ -2111,6 +2214,11 @@ function setupRole(role, userName) {
   } else if (role === 'parent') {
     av.style.background = '#D1FAE5'; av.style.color = '#047857'; av.textContent = (userName||'학부모')[0];
     un.textContent = userName || '학부모';
+    // Update parent banner with student name (학부모 이름 기반)
+    const pbg = document.getElementById('parentBannerGreet');
+    if (pbg) pbg.textContent = `${userName}님, 안녕하세요! 👋`;
+    const plt = document.getElementById('parentLevelPanelTitle');
+    if (plt) plt.textContent = `📊 자녀의 현재 영어 레벨`;
     buildParentLevelPanel('A2');
     showPage('page-parent-report');
     setTimeout(showLumiWelcome, 600);
@@ -2227,7 +2335,7 @@ function buildParentLevelPanel(cefrKey) {
   if (!el || !L) return;
   el.innerHTML = `
     <div class="level-panel-header">
-      <div class="level-panel-title">📊 민준의 현재 영어 레벨</div>
+      <div class="level-panel-title" id="parentLevelPanelTitle">📊 학생의 현재 영어 레벨</div>
       <span class="level-pill" style="--lc:${L.color};--ll:${L.light};--lm:${L.mid};--lt:${L.dark}"><span class="level-dot"></span>${L.cefr} · ${L.name}</span>
     </div>
     <div class="level-trio">
@@ -2401,15 +2509,15 @@ function resetChat() {
 
 /* ============ LISTENING ============ */
 function checkL(btn, ans, step) {
-  const expected = step === 1 ? 'monkeys' : 'penguins';
+  const expected = step === 1 ? 'cat' : 'bag';
   if (ans === expected) {
     btn.classList.add('correct');
-    if (step === 1) document.getElementById('blank1').textContent = 'monkeys';
-    else document.getElementById('blank2').textContent = 'penguins';
+    if (step === 1) document.getElementById('blank1').textContent = 'cat 🐱';
+    else document.getElementById('blank2').textContent = 'bag 👜';
     listenStep++;
     if (listenStep === 1) {
       setTimeout(() => {
-        document.getElementById('listeningAnswers').innerHTML = `<p style="font-size:12px;color:var(--gray-500);margin-bottom:8px">Blank 2 정답을 선택하세요:</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="quiz-option" onclick="checkL(this,'penguins',2)">penguins</button><button class="quiz-option" onclick="checkL(this,'lions',2)">lions</button><button class="quiz-option" onclick="checkL(this,'tigers',2)">tigers</button><button class="quiz-option" onclick="checkL(this,'monkeys',2)">monkeys</button></div>`;
+        document.getElementById('listeningAnswers').innerHTML = `<p style="font-size:12px;color:var(--gray-500);margin-bottom:8px">Blank 2 — Short vowel A /æ/:</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="quiz-option" onclick="checkL(this,'bag',2)">bag 👜</button><button class="quiz-option" onclick="checkL(this,'box',2)">box 📦</button><button class="quiz-option" onclick="checkL(this,'cup',2)">cup ☕</button><button class="quiz-option" onclick="checkL(this,'pan',2)">pan 🍳</button></div>`;
       }, 600);
     } else {
       document.getElementById('blank3').textContent = 'giraffes';
